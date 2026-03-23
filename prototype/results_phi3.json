@@ -1,0 +1,60 @@
+{
+  "model_path": "./models/phi3-mini-4k-q4.gguf",
+  "model_name": "phi3-mini-4k-q4",
+  "n_ctx": 4096,
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output_length": 1223,
+      "has_suggestions": false
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output_length": 1872,
+      "has_suggestions": false
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output_length": 1661,
+      "has_suggestions": false
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output_length": 1469,
+      "has_suggestions": false
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output_length": 1725,
+      "has_suggestions": false
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output_length": 2081,
+      "has_suggestions": false
+    },
+    {
+      "turn": 6,
+      "input": "Talk to the strange figure in the shadows",
+      "output_length": 1688,
+      "has_suggestions": false
+    },
+    {
+      "turn": 7,
+      "input": "Check my inventory",
+      "output_length": 1351,
+      "has_suggestions": false
+    }
+  ],
+  "total_time": 40.85835599899292,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 8,
+  "suggestion_rate": 0.0
+}

@@ -1,0 +1,13 @@
+# Virtual environment
+.venv/
+
+# GGUF model files (large binary, download separately)
+prototype/models/*.gguf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store

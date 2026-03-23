@@ -1,0 +1,60 @@
+{
+  "model_path": "./models/tinyllama-1.1b-chat-q4km.gguf",
+  "model_name": "tinyllama-1.1b-chat-q4km",
+  "n_ctx": 2048,
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output_length": 1766,
+      "has_suggestions": false
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output_length": 1902,
+      "has_suggestions": false
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output_length": 1904,
+      "has_suggestions": false
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output_length": 2056,
+      "has_suggestions": false
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output_length": 2159,
+      "has_suggestions": false
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output_length": 1997,
+      "has_suggestions": false
+    },
+    {
+      "turn": 6,
+      "input": "Talk to the strange figure in the shadows",
+      "output_length": 1980,
+      "has_suggestions": false
+    },
+    {
+      "turn": 7,
+      "input": "Check my inventory",
+      "output_length": 1973,
+      "has_suggestions": false
+    }
+  ],
+  "total_time": 20.026599884033203,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 8,
+  "suggestion_rate": 0.0
+}
