@@ -1,0 +1,52 @@
+[
+    {
+        "id": 1,
+        "prompt": "Begin the adventure. Describe the opening scene where the player awakens.",
+        "category": "opening"
+    },
+    {
+        "id": 2,
+        "prompt": "Look around the room carefully",
+        "category": "exploration"
+    },
+    {
+        "id": 3,
+        "prompt": "Pick up anything that looks useful",
+        "category": "interaction"
+    },
+    {
+        "id": 4,
+        "prompt": "Go through the northern door",
+        "category": "navigation"
+    },
+    {
+        "id": 5,
+        "prompt": "Examine the walls for hidden passages",
+        "category": "investigation"
+    },
+    {
+        "id": 6,
+        "prompt": "Use the torch to light up the dark corridor",
+        "category": "item_use"
+    },
+    {
+        "id": 7,
+        "prompt": "Talk to the strange figure in the shadows",
+        "category": "dialogue"
+    },
+    {
+        "id": 8,
+        "prompt": "Check my inventory",
+        "category": "meta"
+    },
+    {
+        "id": 9,
+        "prompt": "Open the chest carefully",
+        "category": "interaction"
+    },
+    {
+        "id": 10,
+        "prompt": "Read the inscription on the wall",
+        "category": "investigation"
+    }
+]
