@@ -10,11 +10,13 @@ Usage:
 
 import argparse
 import time
+from pathlib import Path
 from llama_cpp import Llama
 
 # ─── Game Master System Prompt ───────────────────────────────────────────────
+# Legacy prompt preserved for before/after comparison (BL-043)
 
-SYSTEM_PROMPT = """\
+LEGACY_SYSTEM_PROMPT = """\
 You are the Game Master of a classic text adventure game in the spirit of Zork \
 and Colossal Cave Adventure. You narrate an immersive, atmospheric dungeon-crawl \
 adventure with vivid but concise descriptions (2-4 sentences per scene).
@@ -33,6 +35,13 @@ Rules you MUST follow:
 - Keep a sense of mystery, danger, and discovery. Reward curiosity.
 - Never break character. You ARE the dungeon — ancient, sardonic, and fair.\
 """
+
+# Production prompt loaded from file — synthesizes BL-010, BL-013, BL-028, BL-036
+_PROMPT_FILE = Path(__file__).parent / "game_master_prompt.txt"
+SYSTEM_PROMPT = _PROMPT_FILE.read_text().strip() if _PROMPT_FILE.exists() else LEGACY_SYSTEM_PROMPT
+
+# Repeat-instruction anchor placed near generation point (BL-036 §2.3)
+STYLE_ANCHOR = "[Style: sardonic narrator, sensory detail, max 90 words. Exactly 3 suggestions.]"
 
 OPENING_PROMPT = "Begin the adventure. Describe the opening scene where the player awakens."
 
@@ -59,11 +68,14 @@ def load_model(model_path: str, n_ctx: int, n_gpu_layers: int = -1) -> Llama:
 class GameSession:
     """Manages the conversation with context window awareness."""
 
-    def __init__(self, llm: Llama, max_ctx: int):
+    def __init__(self, llm: Llama, max_ctx: int, system_prompt: str | None = None):
         self.llm = llm
         self.max_ctx = max_ctx
-        self.messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+        self.system_prompt = system_prompt or SYSTEM_PROMPT
+        self.messages: list[dict] = [{"role": "system", "content": self.system_prompt}]
         self.turn_count = 0
+        # BL-036: use anchor note near generation point for persona maintenance
+        self.use_anchor = (self.system_prompt != LEGACY_SYSTEM_PROMPT)
 
     def _trim_context(self):
         """Keep system prompt + last N turns to stay within context budget.
@@ -79,20 +91,34 @@ class GameSession:
     def _estimate_chars(self) -> int:
         return sum(len(m["content"]) for m in self.messages)
 
-    def generate(self, user_input: str | None = None) -> str:
-        """Send user input (or opening prompt) and get GM response."""
+    def generate(self, user_input: str | None = None) -> dict:
+        """Send user input (or opening prompt) and get GM response.
+        Returns dict with 'text', 'prompt_tokens', 'completion_tokens',
+        'elapsed', 'tok_per_sec' for structured scoring.
+        """
         if user_input is not None:
-            self.messages.append({"role": "user", "content": user_input})
+            content = user_input
         else:
-            self.messages.append({"role": "user", "content": OPENING_PROMPT})
+            content = OPENING_PROMPT
+
+        # BL-036 §2.3: Inject anchor note before the player message
+        # to exploit recency bias and maintain persona/format compliance
+        if self.use_anchor and self.turn_count > 0:
+            self.messages.append({"role": "system", "content": STYLE_ANCHOR})
+
+        self.messages.append({"role": "user", "content": content})
 
         self._trim_context()
         self.turn_count += 1
 
+        # BL-036 §4.4: max_tokens=200 caps response length (was 512)
+        # Combined with few-shot calibration + anchor for triple redundancy
+        max_tok = 200 if self.use_anchor else 512
+
         t0 = time.time()
         response = self.llm.create_chat_completion(
             messages=self.messages,
-            max_tokens=512,
+            max_tokens=max_tok,
             temperature=0.8,
             top_p=0.95,
             repeat_penalty=1.1,
@@ -110,7 +136,13 @@ class GameSession:
         tps = completion_tokens / elapsed if elapsed > 0 else 0
         print(f"  [{self.turn_count}] {completion_tokens} tok | {elapsed:.1f}s | {tps:.1f} tok/s | ctx: {prompt_tokens}+{completion_tokens}")
 
-        return reply
+        return {
+            "text": reply,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "elapsed": elapsed,
+            "tok_per_sec": tps,
+        }
 
 
 # ─── Terminal UI ─────────────────────────────────────────────────────────────
@@ -151,8 +183,8 @@ def main():
     print(f"{DIM}Generating opening scene...{RESET}")
 
     # Opening scene
-    opening = session.generate()
-    print_gm(opening)
+    result = session.generate()
+    print_gm(result["text"])
 
     # Game loop
     while session.turn_count < args.turns:
@@ -168,8 +200,8 @@ def main():
             print("\nThe dungeon fades to black. Until next time...")
             break
 
-        reply = session.generate(user_input)
-        print_gm(reply)
+        result = session.generate(user_input)
+        print_gm(result["text"])
 
     print(f"\n{DIM}Session ended after {session.turn_count} turns.{RESET}")
     print(f"{DIM}Total messages in context: {len(session.messages)}{RESET}\n")

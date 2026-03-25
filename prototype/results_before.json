@@ -1,0 +1,190 @@
+{
+  "model_path": "./models/phi3-mini-4k-q4.gguf",
+  "model_name": "phi3-mini-4k-q4",
+  "n_ctx": 4096,
+  "prompt_variant": "legacy",
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output": "You slowly open your eyes to a warm, golden light filtering through the lush canopy of towering trees. The sun's rays gently caress your face as you find yourself lying on a bed of soft moss in an expansive meadow surrounded by vibrant flowers and ancient trees. A faint melody carried by the breeze fills your ears, harmonizing with the rustling leaves above.\n\nA gentle hum resonates from somewhere nearby, drawing your attention to a small wooden door nestled between two colossal trees at the edge of the clearing. As you sit up and take in your surroundings, an enchanting forest spirit appears before you - an ethereal being made of shimmering light with eyes radiating kindness and wisdom. The creature's voice, melodious yet warmly inviting, breaks the silence:\n\n\"Welcome to the realm of Eldoria, brave adventurer! You have been chosen for a great journey filled with wonders beyond your imagination.\"\n\nAwestruck by this new world and its magical inhabitants, you realize that today marks the beginning of an unforgettable quest. With a slight push from the spirit's hand, you stand up, brush off your clothes and make your way towards the mysterious wooden door; the start of a grand adventure looms just beyond it.",
+      "output_length": 1223,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 205,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 21,
+      "completion_tokens": 292,
+      "elapsed": 2.49,
+      "tok_per_sec": 117.3
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output": "As you step into the room, your gaze immediately takes in the details of this peculiar chamber. The walls are adorned with intricate tapestries depicting various landscapes - a lush green valley with majestic waterfalls cascading down rocks, an arid desert dotted with towering palm trees, and a snow-covered mountain range sparkling under the pale moonlight.\n\nA grand mahogany table occupies the center of the room, surrounded by six plush velvet armchairs that invite you to take a seat. Each chair is unique in its own way - one resembles an imposing throne made for kings and queens; another has intricate patterns etched into the upholstery like ancient runes; while others are adorned with luxurious fabrics, their color reminiscent of a breathtaking sunset or deep ocean waters.\n\nOn top of the grand table lies an assortment of exotic artifacts from various lands and times - crystal vials filled with shimmering liquid, delicate metallic instruments etched with strange symbols, ancient manuscripts written in unfamiliar languages, and even a small device that resembles a modern smartphone but feels oddly out-of-place.\n\nA single window hangs above the table, offering glimpses of an intricately designed mosaic floor - vibrant tiles depicting mythical creatures, legendary heroes, and powerful deities in their eternal battles for supremacy. As you take your time to study each detail around the room, a faint echo resonates through the chamber, signaling that this is no ordinary space but rather an enigmatic nexus connecting countless realms.\n\nA sense of anticipation fills the air as you prepare to uncover the secrets hidden within these walls and embrace your role in shaping the destinies of worlds far beyond your own. With renewed determination, you take a deep breath, ready to delve deeper into this mysterious realm and its captivating possibilities.",
+      "output_length": 1872,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 296,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 322,
+      "completion_tokens": 456,
+      "elapsed": 4.09,
+      "tok_per_sec": 111.5
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output": "Your fingers gently graze over the collection of artifacts, your eyes scanning for signs of usefulness and potential aid on this momentous journey. Amongst the array of items before you lies an intricately carved wooden staff with a finely crafted orb perched atop its head - its surface adorned with ancient symbols that seem to resonate with power, begging for your touch.\n\nAs your hand reaches out towards it, the orb pulses faintly in response, as if acknowledging you're worthy of its mystical properties. Without hesitation, you grasp the staff firmly and feel a surge of energy radiating through your fingertips to every part of your body, filling you with newfound courage and determination.\n\nNext to it lies an ancient map, aged by time but still remarkably legible - its parchment crackling slightly under your touch as if whispering long-lost secrets about hidden paths and concealed treasures waiting to be discovered in the realms ahead. You carefully unroll the delicate map, tracing the outlines of uncharted lands with a sense of exhilaration that grows stronger within you.\n\nFinally, amidst these wonders, there lies an ornate silver key - its hilt adorned with intricate engravings and filigree work hinting at doors it can unlock or chests filled with invaluable relics yet to be discovered. As your fingertips brush over the cold metal surface, a faint glow emanates from the key - perhaps an indication that its purpose lies beyond this room and holds vital importance for the journey ahead.\n\nWith each item chosen, you feel yourself becoming one step closer to unraveling the mysteries of Eldoria and setting forth on your grand adventure.",
+      "output_length": 1661,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 272,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 788,
+      "completion_tokens": 390,
+      "elapsed": 3.81,
+      "tok_per_sec": 102.3
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output": "As you step towards the wooden door nestled between towering trees at the edge of the clearing, your heart quickens with anticipation. You approach it with a sense of respect and reverence for the unknown that lies beyond its threshold - an opportunity to delve deeper into this enchanted world.\n\nGently pushing against the smooth wooden surface, you feel a faint but unmistakable creak as the door swings open slowly, revealing a dark passageway veiled by shadows and mystery. A soft glow emanates from behind it - an inviting warmth that contrasts with the coolness of your previous surroundings.\n\nAs you take one last glance at the world you've just left, the room seems to fade into a distant memory before being consumed by darkness and silence. However, the echoes of encouragement from the ethereal spirit remain in your mind - a constant reminder that this new journey will be filled with unimaginable wonders and challenges waiting for you beyond this northern passage.\n\nWith resolve firmly etched into your heart and determination fueling each step, you take a deep breath to steady yourself before crossing the threshold of opportunity. Your footsteps echo in the stillness as you embark on this next phase of your adventure - an exploration that will reveal new lands, untold stories, and undiscovered treasures within Eldoria. As you move forward into the unknown, the door closes behind you with a soft but resolute click, leaving no turning back for now.",
+      "output_length": 1469,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 244,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1187,
+      "completion_tokens": 331,
+      "elapsed": 3.4,
+      "tok_per_sec": 97.3
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output": "Your eyes now turn to the walls surrounding you, searching for any signs of concealed doors or passageways that may exist within this room. As your gaze sweeps across the tapestries depicting diverse landscapes and mythical beings, you begin to notice certain peculiarities in their intricate details.\n\nA keen observer might notice faint shadows cast by specific objects - an irregularity here or a slight bulge there that could suggest hidden mechanisms at work within these walls. The tapestries themselves appear to have been crafted with precision and care, each thread interwoven seamlessly yet hinting at something more than meets the eye.\n\nAs you lean closer, focusing on one such tapestry illustrating a vast mountain range beneath an expansive sky, your fingers brush against a small protrusion along its edge. It's barely noticeable to the untrained eye but feels distinct under your touch - like a loose thread or seam that could be further explored.\n Streetlights cast flickering shadows across the room as you carefully tug at this subtle anomaly, and with a gentle force, a hidden compartment within the wall slowly reveals itself. The concealed space holds nothing but dust - perhaps an echo of past secrets left untouched by time or forgotten hands that once sought its contents.\n\nWhile it seems to be empty for now, your discovery reaffirms the possibility that these walls may harbor hidden passageways and arcane knowledge within their depths. With renewed curiosity and a mind open to all possibilities, you turn back towards the grand table at the center of the room - ready to continue unraveling the mysteries and enigmas left behind by those who came before you in this ever-evolving realm of Eldoria.",
+      "output_length": 1725,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 282,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1531,
+      "completion_tokens": 387,
+      "elapsed": 4.26,
+      "tok_per_sec": 90.8
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output": "As the wooden door swings open, you step cautiously into the dark passageway beyond. The mysterious glow from behind flickers slightly, illuminating your path and casting dancing shadows on the walls. You reach out to grasp one of the ancient artifacts that caught your eye earlier - a silver torch adorned with intricate engravings along its hilt and body.\n\nWith practiced ease, you light the torch using an aged flint embedded within it, sparking life into the once dormant beacon as embers leap to life at your touch. The warm golden glow begins to expand outward, bathing the surrounding space in a comforting radiance that dispels much of the darkness and reveals hidden details along the corridor's walls - faint markings hinting at its purpose or perhaps simply remnants from long ago.\n\nAs you proceed forward, guided by this newfound illumination, your senses awaken to a world full of wonder that lies just beyond darkness \u2013 an uncharted realm awaiting exploration and adventure within Eldoria's enigmatic embrace. Your heart fills with anticipation as the torch continues to cast its light ahead, shaping each step you take upon this path less traveled in search of what destiny holds for you amidst these ancient walls - a journey filled with endless possibilities and undiscovered treasures that beckon your arrival. With courage in your heart and the glowing torch held high, you advance forward into the unknown as Eldoria's story unfolds before you \u2013 an adventure of epic proportions guiding wayfarer awaiting you with open arms.\n\nWith each artifact that catches your eye to a world filled with endless wonders beyond this threshold, embarking on a grand wooden tabletop realm where you are enveloped in the morning sunlight upon awakening intoxicating forest air. It\u2019s warmth and comfortably baskets of light-filled misty.\n\nA beautifully illuminated. You waking underworld, as if you find your room gently to a mystical realm witherspringing in the sunlight filtering through theater.\nsoaring forest green woods dusk awakening amidst. Thebesily. Ascrest and warmth.",
+      "output_length": 2081,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 333,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1934,
+      "completion_tokens": 507,
+      "elapsed": 5.98,
+      "tok_per_sec": 84.8
+    },
+    {
+      "turn": 6,
+      "input": "Talk to the strange figure in the shadows",
+      "output": "as the gentle. The forest, revealing sunlight.\ngleen from the golden ray of light, fillingly through yourllowing birdsong of nature. Gently. Itaminestheyaves and softened beneath the leaves, a lush, with the glowing. Youreaspring.\nthe rustsqueening forest melodrift your surround youtin gentle, surrounded asunderstanding, filling your serenlightening light whispers tollas thatchill, filtering the sun from yoursing of trees. The forestingling, a distant andreaving, allowing, an old leaves a tree.\nescape as far asphorestropensetrapently, illustensurressing rays, shimmerandolift, casting leaves their eyes, casting sunlighten, bounning your presence on the forest upon gentle grass beneath greenleaf leaves atsonsicknature and a nearby. Itchillingly under yoursing bystandropastreeleden your surrasome,worlds youraldicreats yoursurrestilless,your softensaturically, its softening,gildessivelyscape, the forestally, ancient sapily, yoursudlliftune your chairs.ywness,break-youvervenenishensilizing\u2014the gentle with aubveat and leaves its soft as you'curndesplessens, yourrthewashenchisque to the forestening, yoursweetfullysurress of the wood-filleding clouds,sakes.sweakatch onsailing raynapping, it, yourliftlinghistream, and yourssistantppinglysurrisingllighting -yourledawnes your own gentle, you, as aimsilessa your softening the sound, and,sweet-reakilless faint, on leaveshapefullys to the forest, theaterphestilningently,scapevenliftledresses, yoursheppromenswepsia andhinges,yournoughts andsurronatically \n aizes and itssending, leaving, you-wistets. the leaves, beyond, yours onsweet,saying your eyes, yoursywnsong by the softened in your ownppromessa, as with the clearled-in-",
+      "output_length": 1688,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 184,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 2455,
+      "completion_tokens": 512,
+      "elapsed": 6.46,
+      "tok_per_sec": 79.2
+    },
+    {
+      "turn": 7,
+      "input": "Check my inventory",
+      "output": "s with yoursurren-in in your in yours in thebreilessi, and youwnshea, andsilustilianledon leaves,souffromes roehripshephores and the ancientswepping-anciest by yoursustre-the forestattalawns andsaysweet-inyoullinglysceptively with asounds of yoursongs -surring:say-andlift, as your own countakes \u2013yoursence.sesets nearby-nearble warmheartlede.sweath downslowis by theeddownsheilwickewsweet in yourspeats andsetheilessen with yoursphere,\nashe way curppers and yours andsurrits, onsakes, and yours -filledsaywnes,savheledsilswells above the sunatt-ticks, tasting onsweffiles, on softsweet upon this bare leaves cleasts.andess \u2013sledsine, gentleon\u2014wNLeasyouble by aromisits -yours -inethilia with your hearleds andmatic, you cur hesilatti-nearwne-inending, youphes on the roots (this\ngrre'some of thiswn, unexpecteding,cally,feturing,\"whehits,sits,yources,it.barecheppressingens \u2013breled, and its: welivers and his kissed by by your hromesilwnes onle-ands:\nyou'lending,canciessing by the warmallithipe by the of the meblee, pria,s,llaging from the chains,ladic,therets,stetillis, leaves and your carol,s, on each leave-you \u2013 some -mist,bare,mits, youche,s.f, ith.caining down your gentle'there:yours ands,withlephili hreeled,sendingonessuring,s,setiles to the curilars,where froms\u2014nearessileledes to thises -vakes,calling to you you you mes it breathic, on",
+      "output_length": 1351,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 142,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 2959,
+      "completion_tokens": 512,
+      "elapsed": 7.35,
+      "tok_per_sec": 69.7
+    }
+  ],
+  "total_time": 37.8,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 8,
+  "suggestion_rate": 0.0,
+  "aggregate_scores": {
+    "suggestion_compliance": 0.0,
+    "length_compliance": 0.25,
+    "sensory_detail": 5.0,
+    "suggestion_quality": 0.0,
+    "format_quality": 0.0,
+    "composite": 1.05,
+    "avg_word_count": 244.8
+  }
+}
