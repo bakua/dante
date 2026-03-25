@@ -4,6 +4,11 @@ import 'dart:io';
 import 'package:llamadart/llamadart.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Default path (relative to assets or app docs) for the Game Master GBNF
+/// grammar file. Callers can override via the [grammarFilePath] parameter
+/// on [generate] / [generateComplete].
+const kDefaultGrammarFilename = 'game_master.gbnf';
+
 /// Status of the inference engine lifecycle.
 enum InferenceStatus {
   uninitialized,
@@ -110,7 +115,16 @@ class InferenceService {
   /// for a typewriter effect.
   ///
   /// [maxTokens] limits the number of tokens generated (default: 256).
-  Stream<String> generate(String prompt, {int maxTokens = 256}) async* {
+  ///
+  /// [grammarFilePath] optionally points to a GBNF grammar file that
+  /// constrains model output at the token sampling level (BL-049).
+  /// When provided, the grammar string is read from the file and passed
+  /// to llamadart's [GenerationParams.grammar].
+  Stream<String> generate(
+    String prompt, {
+    int maxTokens = 256,
+    String? grammarFilePath,
+  }) async* {
     if (_engine == null || _status != InferenceStatus.modelLoaded) {
       throw StateError(
         'Model not loaded. Call initialize() then loadModel() first.',
@@ -121,8 +135,15 @@ class InferenceService {
     _lastError = null;
 
     try {
+      // Build generation params, optionally with GBNF grammar
+      final grammarString = await _loadGrammarFile(grammarFilePath);
+      final params = GenerationParams(
+        maxTokens: maxTokens,
+        grammar: grammarString,
+      );
+
       int tokenCount = 0;
-      await for (final token in _engine!.generate(prompt)) {
+      await for (final token in _engine!.generate(prompt, params: params)) {
         yield token;
         tokenCount++;
         if (tokenCount >= maxTokens) break;
@@ -139,9 +160,19 @@ class InferenceService {
   ///
   /// Convenience method that collects all tokens into a single string.
   /// For UI with typewriter effects, prefer [generate] instead.
-  Future<String> generateComplete(String prompt, {int maxTokens = 256}) async {
+  ///
+  /// [grammarFilePath] optionally points to a GBNF grammar file (BL-049).
+  Future<String> generateComplete(
+    String prompt, {
+    int maxTokens = 256,
+    String? grammarFilePath,
+  }) async {
     final tokens = <String>[];
-    await for (final token in generate(prompt, maxTokens: maxTokens)) {
+    await for (final token in generate(
+      prompt,
+      maxTokens: maxTokens,
+      grammarFilePath: grammarFilePath,
+    )) {
       tokens.add(token);
     }
     return tokens.join('');
@@ -169,6 +200,17 @@ class InferenceService {
     _backend = null;
     _loadedModelPath = null;
     _status = InferenceStatus.disposed;
+  }
+
+  /// Read a GBNF grammar file and return its content as a string.
+  ///
+  /// Returns null if [path] is null or the file does not exist,
+  /// allowing grammar-free inference as the default.
+  Future<String?> _loadGrammarFile(String? path) async {
+    if (path == null) return null;
+    final file = File(path);
+    if (!file.existsSync()) return null;
+    return file.readAsStringSync();
   }
 
   /// Search the app documents directory for a .gguf model file.

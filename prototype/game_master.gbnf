@@ -1,0 +1,24 @@
+# DANTE TERMINAL Game Master output grammar
+# Enforces: narrative text block followed by exactly 3 numbered suggestions
+# Format matches game_master_prompt.txt example:
+#
+#   [narrative prose, 2-3 sentences]
+#
+#   > 1. [action suggestion]
+#   > 2. [action suggestion]
+#   > 3. [action suggestion]
+#
+# The narrative may contain any printable characters and single newlines
+# (for line wrapping) but NOT double newlines — the double newline acts
+# as the mandatory separator between narrative and suggestions.
+
+root ::= narrative "\n\n> 1. " suggestion "\n> 2. " suggestion "\n> 3. " suggestion "\n"?
+
+# Narrative: prose text that may span multiple lines but never contains
+# double newlines (\n\n). This ensures the blank line always marks the
+# transition to suggestions.
+narrative ::= narrative-char+
+narrative-char ::= [^\n] | "\n" [^\n]
+
+# Suggestion: non-empty single-line text (any characters except newline)
+suggestion ::= [^\n]+

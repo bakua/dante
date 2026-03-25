@@ -1,0 +1,255 @@
+{
+  "model_path": "models/phi3-mini-4k-q4.gguf",
+  "model_name": "phi3-mini-4k-q4",
+  "n_ctx": 4096,
+  "prompt_variant": "production",
+  "grammar_enabled": true,
+  "grammar_file": "game_master.gbnf",
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output": "You slowly open your eyes to a warm, golden light filtering through the lush canopy of towering trees. The sun's rays gently caress your face as you find yourself lying on a bed of soft moss in an expansive meadow surrounded by vibrant flowers and ancient trees. A faint melody carried by the breeze fills your ears, harmonizing with the rustling leaves above.\n\n> 1. Attempt to sit up and take in your surroundings.\n> 2. Stay still and listen for more clues about where you are.\n> 3. Carefully stand up and begin exploring the meadow.",
+      "output_length": 534,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 5,
+        "sensory_detail": 5,
+        "suggestion_quality": 4,
+        "format_quality": 5,
+        "composite": 4.8,
+        "word_count": 63,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 21,
+      "completion_tokens": 144,
+      "elapsed": 1.56,
+      "tok_per_sec": 92.6
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output": "As you survey the room, your eyes are immediately drawn to a mysterious ancient chest standing against one wall. It is adorned with intricate carvings of mythical creatures and symbols that hint at long-forgotten tales. A grand piano occupies another corner of the dimly lit space, its keys slightly dusty from neglect.\n\n> 1. Approach the ancient chest to examine it closely.\n> 2. Inspect the grand piano for any hidden clues or mechanisms that may have been overlooked.\n> 3. Open a nearby door or window to search for additional exits and investigate what lies beyond these barriers.",
+      "output_length": 584,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 3,
+        "sensory_detail": 3,
+        "suggestion_quality": 2,
+        "format_quality": 5,
+        "composite": 3.6,
+        "word_count": 52,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 173,
+      "completion_tokens": 143,
+      "elapsed": 1.55,
+      "tok_per_sec": 92.4
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output": "You notice a set of worn, leather-bound journals stacked neatly on an adjacent shelf. Their covers are embossed with the same mythical creatures and symbols you saw on the chest. Tentatively reaching out, your fingers brush against the spines as one falls open to reveal pages filled with cryptic drawings and faded ink.\n\n> 1. Carefully examine the contents of the journal(s) for any clues related to your current surrayer or location.\n> 2. Retrieve a flashlight from beneath the chest, hoping it may aid you as you explore further.\n> 3. Sift through other objects in the room, such as books and personal belongings, looking for anything that could serve as an improvised tool.",
+      "output_length": 677,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 3,
+        "sensory_detail": 3,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.2,
+        "word_count": 53,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 326,
+      "completion_tokens": 170,
+      "elapsed": 1.88,
+      "tok_per_sec": 90.3
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output": "You find yourself in a narrow, stone-paved corridor with high vaulted ceilings. The air feels cooler and slightly more foreboding than the room you previously occupied. Intricate frescoes adorn the walls, depicting scenes from an unknown civilization's past. One wall features a door, partially concealed by draped fabric that whispers of secrets untold.\n Written in Latin on its surface reads: \"Adventus et Ignorantia\" which translates to 'Arrival and Ignorance.' The intricately designed doorknob seems inviting but also intimidating, hinting at the unknown that lies beyond.\n\n> 1. Examine the Latin inscription further for potential clues or meanings related to your adventure.\n> 2. Proceed to unsheathe and inspect a dagger you found hidden inside one of the",
+      "output_length": 762,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 3,
+        "length_compliance": 5,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.6,
+        "word_count": 85,
+        "suggestion_count": 2
+      },
+      "prompt_tokens": 506,
+      "completion_tokens": 200,
+      "elapsed": 2.33,
+      "tok_per_sec": 85.8
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output": "As you carefully observe the walls, your trained eye catches a faint outline of an anomaly in the frescoed surface. It appears to be a subtle indentation that hints at concealed mechanisms within the stone itself. With cautious yet determined hands, you trace over it with fingertips and discover it's part of a hidden switch camouflaged amidst artwork.\n\n> 1. Press or manipulate the revealed mechanism to potentially unlock secret passageways along the corridor walls.\n> 2. Investigate nearby statues, paintings, or other fixtures that may conceal further secrets within their design.\n> 3. Utilize a makeshift tool such as your flashlight's reflective surface to amplify light in darker sections of the frescoes, hoping to reveal additional hidden features.",
+      "output_length": 758,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 3,
+        "sensory_detail": 3,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.2,
+        "word_count": 58,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 719,
+      "completion_tokens": 183,
+      "elapsed": 2.18,
+      "tok_per_sec": 84.0
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output": "You unclasp the torch, its metallic body reflecting a dim glow against your palm. Holding it aloft, you cautiously navigate the corridor's shadows as they dissipate under the steady illumination of flames dancing within the torch. The newfound light casts stark contrasts upon the walls and floor, unveiling details previously obscured in darkness: a series of runes etched into one wall's surface, suggesting an esoteric language or code that could be essential to your quest.\n\n> 1. Decipher any visible inscriptions on surrounding surfaces with greater detail now that the corridor is lit up.\n> 2. Examine if the light from the torch reveals additional hidden mechanisms, secret compartments, or other interactive features within the environment.\n> 3. Keep an eye out for any potential hazards or",
+      "output_length": 798,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 5,
+        "sensory_detail": 5,
+        "suggestion_quality": 2,
+        "format_quality": 5,
+        "composite": 4.4,
+        "word_count": 75,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 918,
+      "completion_tokens": 200,
+      "elapsed": 2.4,
+      "tok_per_sec": 83.2
+    },
+    {
+      "turn": 6,
+      "input": "Talk to the strange figure in the shadows",
+      "output": "In the soft glow of your torch, a silhouette emerges from one end of the corridor. The figure appears to be an elderly man dressed in ancient attire befitting a wise sage or guardian. His face is etched with time and wisdom yet his eyes hold a sparkle that speaks volumes about untold knowledge and experience.\n\n> 1. Approach the figure cautiously, maintaining respectful distance while preparing to engage in conversation.\n> 2. Present your presence as friendly or ask for permission before attempting any further interaction with the guardian-like figure.\n> 3. Listen attentively and seek advice from the figure about navigating through this mysterious environment, potentially uncovering hidden paths, warnings, or insights that could aid in your adventure.",
+      "output_length": 760,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 3,
+        "sensory_detail": 3,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.2,
+        "word_count": 56,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 1132,
+      "completion_tokens": 178,
+      "elapsed": 2.2,
+      "tok_per_sec": 81.1
+    },
+    {
+      "turn": 7,
+      "input": "Check my inventory",
+      "output": "As you pause to review your inventory, the contents of your worn leather pouch reveal a selection of items that could be useful in various situations:\n- A silver keychain with two keys (one may unlock the ancient chest or another door).\n- The cryptic journal containing sketches and possible clues.\n- Dried herbs that might serve medicinal purposes or as part of an offering to gain favor from supernatural beings.\n- An old, but reliable, compass whose needle flutters slightly, indicating it's sensitive to forces beyond the mundane world.\n- A small pouch containing a handful of coins and a mysterious amulet with intricate carvings that may hold significance or power within this realm.\n\n> 1. Choose an item from your inventory you believe will be most beneficial for the current situation, such as using the keychain to unlock doors",
+      "output_length": 836,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 1,
+        "length_compliance": 3,
+        "sensory_detail": 2,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 2.2,
+        "word_count": 115,
+        "suggestion_count": 1
+      },
+      "prompt_tokens": 1318,
+      "completion_tokens": 200,
+      "elapsed": 2.6,
+      "tok_per_sec": 76.8
+    },
+    {
+      "turn": 8,
+      "input": "Open the chest carefully",
+      "output": "Gripping the silver keychain in your hand, you approach the ancient chest with a mix of trepidation and excitement. The carvings on its surface seem to beckon as if inviting you into their history. With a gentle twist, one of the keys fits perfectly into the lock's intricate mechanism, causing it to turn smoothly without resistance. You pull at the chest's lid with anticipation, revealing the contents within\u2014a collection of ancient scrolls bound by leather, each promising secrets and knowledge that may propel you further on your journey or protect you from unseen dangers lurking in the shadows of this enigmatic world.\n\n> 1. Examine the scrolls one by one, searching for any immediate clues about their contents or potential importance to your adventure.\n> 2. Inspect the chest and its lock carefully; there may be hidden mechan",
+      "output_length": 835,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 3,
+        "length_compliance": 3,
+        "sensory_detail": 3,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 2.8,
+        "word_count": 102,
+        "suggestion_count": 2
+      },
+      "prompt_tokens": 1527,
+      "completion_tokens": 200,
+      "elapsed": 2.61,
+      "tok_per_sec": 76.6
+    },
+    {
+      "turn": 9,
+      "input": "Climb the stone staircase",
+      "output": "The stone staircase before you spirals upward, leading into the unknown. Its steps are worn and uneven, hinting at countless feet that have ascended this path over untold centuries. At its zenith lies a grand chamber, veiled by silence and secrecy\u2014a place where ancient wisdom is said to reside or peril lurks in equal measure for those who seek it without understanding.\n\n> 1. Navigate the staircase cautiously, watching your step and ready to handle any loose stones that may present a hazard as you climb.\n> 2. Once at the top, scrutinize the chamber entrance carefully for any traps or signs of disturbance before deciding whether to enter immediately or seek more information elsewhere in the current location.\n> 3. If proceeding into the chamber is your choice, use a torch to light the way and maintain situational awaren",
+      "output_length": 828,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 5,
+        "sensory_detail": 3,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.6,
+        "word_count": 62,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 1738,
+      "completion_tokens": 200,
+      "elapsed": 2.73,
+      "tok_per_sec": 73.3
+    },
+    {
+      "turn": 10,
+      "input": "Read the inscription on the wall",
+      "output": "As you ascend the spiral staircase, a carving on its wall catches your eye\u2014a symbol that resembles one from your journal. The inscription appears to be in an ancient language yet familiar enough for you to decipher with careful thought and consideration of patterns seen before. It reads:\n\n> 1. Attempt to translate the inscription using any knowledge or context clues gathered so far, including similar symbols found on objects around this room or your journal entries.\n> 2. If translation proves impossible at that moment, document the symbol for later reference and continue exploring other elements in the chamber once inside.\n> 3. Consider if there's a direct correlation between the inscription and any artifacts within reach during ascent\u2014perhaps it could reveal their significance or correct usage upon reaching your destination.",
+      "output_length": 837,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 5,
+        "length_compliance": 3,
+        "sensory_detail": 2,
+        "suggestion_quality": 0,
+        "format_quality": 5,
+        "composite": 3.0,
+        "word_count": 48,
+        "suggestion_count": 3
+      },
+      "prompt_tokens": 1949,
+      "completion_tokens": 177,
+      "elapsed": 2.48,
+      "tok_per_sec": 71.4
+    }
+  ],
+  "total_time": 24.5,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 11,
+  "suggestion_rate": 0.91,
+  "aggregate_scores": {
+    "suggestion_compliance": 4.27,
+    "length_compliance": 3.73,
+    "sensory_detail": 3.36,
+    "suggestion_quality": 0.73,
+    "format_quality": 5.0,
+    "composite": 3.42,
+    "avg_word_count": 69.9
+  }
+}

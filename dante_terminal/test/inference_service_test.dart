@@ -37,9 +37,28 @@ void main() {
       );
     });
 
+    test('generate with grammar throws StateError when model not loaded', () {
+      expect(
+        () => service
+            .generate('test prompt', grammarFilePath: '/fake/grammar.gbnf')
+            .first,
+        throwsStateError,
+      );
+    });
+
     test('generateComplete throws StateError when model not loaded', () {
       expect(
         () => service.generateComplete('test prompt'),
+        throwsStateError,
+      );
+    });
+
+    test(
+        'generateComplete with grammar throws StateError when model not loaded',
+        () {
+      expect(
+        () => service.generateComplete('test prompt',
+            grammarFilePath: '/fake/grammar.gbnf'),
         throwsStateError,
       );
     });

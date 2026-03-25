@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 # Import from dante_cli
-from dante_cli import load_model, GameSession, LEGACY_SYSTEM_PROMPT, SYSTEM_PROMPT
+from dante_cli import load_model, load_grammar, GameSession, LEGACY_SYSTEM_PROMPT, SYSTEM_PROMPT
 
 # Scripted player actions for automated testing
 TEST_ACTIONS = [
@@ -149,16 +149,20 @@ def _has_suggestions(text: str) -> bool:
 # ─── Test Runner ─────────────────────────────────────────────────────────────
 
 def run_test(model_path: str, n_ctx: int, num_turns: int, gpu_layers: int,
-             use_legacy: bool = False) -> dict:
+             use_legacy: bool = False, grammar_path: str | None = None) -> dict:
     """Run an automated game session and collect results with per-turn scores."""
     prompt_label = "legacy" if use_legacy else "production"
     system_prompt = LEGACY_SYSTEM_PROMPT if use_legacy else SYSTEM_PROMPT
+
+    grammar = load_grammar(grammar_path) if grammar_path else None
 
     results = {
         "model_path": model_path,
         "model_name": Path(model_path).stem,
         "n_ctx": n_ctx,
         "prompt_variant": prompt_label,
+        "grammar_enabled": grammar is not None,
+        "grammar_file": grammar_path,
         "turns": [],
         "total_time": 0,
         "errors": [],
@@ -171,7 +175,7 @@ def run_test(model_path: str, n_ctx: int, num_turns: int, gpu_layers: int,
         results["errors"].append(f"Model load failed: {e}")
         return results
 
-    session = GameSession(llm, n_ctx, system_prompt=system_prompt)
+    session = GameSession(llm, n_ctx, system_prompt=system_prompt, grammar=grammar)
     t_start = time.time()
 
     # Turn 0: opening scene
@@ -259,6 +263,7 @@ def print_summary(results: dict):
     print("\n" + "=" * 70)
     print(f"MODEL: {results['model_name']}")
     print(f"PROMPT: {results.get('prompt_variant', 'unknown')}")
+    print(f"GRAMMAR: {'enabled (' + results.get('grammar_file', '') + ')' if results.get('grammar_enabled') else 'disabled'}")
     print(f"CONTEXT: {results['n_ctx']} tokens")
     print(f"TURNS COMPLETED: {results.get('turns_completed', 0)}")
     print(f"TOTAL TIME: {results['total_time']}s")
@@ -301,10 +306,12 @@ def main():
     parser.add_argument("--output", type=str, default=None, help="Save JSON results to file")
     parser.add_argument("--legacy", action="store_true",
                         help="Use legacy (pre-research) system prompt for comparison")
+    parser.add_argument("--grammar", type=str, default=None,
+                        help="Path to GBNF grammar file for structured output (BL-049)")
     args = parser.parse_args()
 
     results = run_test(args.model, args.ctx, args.turns, args.gpu_layers,
-                       use_legacy=args.legacy)
+                       use_legacy=args.legacy, grammar_path=args.grammar)
     print_summary(results)
 
     if args.output:

@@ -6,12 +6,13 @@ Validates: model quality, prompt structure, and context window management.
 
 Usage:
     python dante_cli.py --model /path/to/model.gguf [--ctx 4096] [--turns 20]
+    python dante_cli.py --model /path/to/model.gguf --grammar game_master.gbnf
 """
 
 import argparse
 import time
 from pathlib import Path
-from llama_cpp import Llama
+from llama_cpp import Llama, LlamaGrammar
 
 # ─── Game Master System Prompt ───────────────────────────────────────────────
 # Legacy prompt preserved for before/after comparison (BL-043)
@@ -68,12 +69,14 @@ def load_model(model_path: str, n_ctx: int, n_gpu_layers: int = -1) -> Llama:
 class GameSession:
     """Manages the conversation with context window awareness."""
 
-    def __init__(self, llm: Llama, max_ctx: int, system_prompt: str | None = None):
+    def __init__(self, llm: Llama, max_ctx: int, system_prompt: str | None = None,
+                 grammar: LlamaGrammar | None = None):
         self.llm = llm
         self.max_ctx = max_ctx
         self.system_prompt = system_prompt or SYSTEM_PROMPT
         self.messages: list[dict] = [{"role": "system", "content": self.system_prompt}]
         self.turn_count = 0
+        self.grammar = grammar
         # BL-036: use anchor note near generation point for persona maintenance
         self.use_anchor = (self.system_prompt != LEGACY_SYSTEM_PROMPT)
 
@@ -116,13 +119,18 @@ class GameSession:
         max_tok = 200 if self.use_anchor else 512
 
         t0 = time.time()
-        response = self.llm.create_chat_completion(
+        kwargs = dict(
             messages=self.messages,
             max_tokens=max_tok,
             temperature=0.8,
             top_p=0.95,
             repeat_penalty=1.1,
         )
+        # BL-049: apply GBNF grammar to constrain output format
+        if self.grammar is not None:
+            kwargs["grammar"] = self.grammar
+
+        response = self.llm.create_chat_completion(**kwargs)
         elapsed = time.time() - t0
 
         reply = response["choices"][0]["message"]["content"].strip()
@@ -168,16 +176,32 @@ def print_banner():
 
 # ─── Main Loop ───────────────────────────────────────────────────────────────
 
+def load_grammar(grammar_path: str | None) -> LlamaGrammar | None:
+    """Load a GBNF grammar file for structured output constraint."""
+    if grammar_path is None:
+        return None
+    path = Path(grammar_path)
+    if not path.exists():
+        print(f"\033[31mError: Grammar file not found: {grammar_path}\033[0m")
+        return None
+    grammar = LlamaGrammar.from_file(str(path), verbose=False)
+    print(f"   ✓ Grammar loaded: {path.name}")
+    return grammar
+
+
 def main():
     parser = argparse.ArgumentParser(description="DANTE TERMINAL - CLI Text Adventure")
     parser.add_argument("--model", required=True, help="Path to GGUF model file")
     parser.add_argument("--ctx", type=int, default=4096, help="Context window size (default: 4096)")
     parser.add_argument("--turns", type=int, default=20, help="Max turns before auto-quit (default: 20)")
     parser.add_argument("--gpu-layers", type=int, default=-1, help="GPU layers (-1 = all, 0 = CPU only)")
+    parser.add_argument("--grammar", type=str, default=None,
+                        help="Path to GBNF grammar file for structured output (BL-049)")
     args = parser.parse_args()
 
     llm = load_model(args.model, args.ctx, args.gpu_layers)
-    session = GameSession(llm, args.ctx)
+    grammar = load_grammar(args.grammar)
+    session = GameSession(llm, args.ctx, grammar=grammar)
 
     print_banner()
     print(f"{DIM}Generating opening scene...{RESET}")
