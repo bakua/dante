@@ -7,7 +7,7 @@ void main() {
     await tester.pumpWidget(const DanteTerminalApp());
 
     // Header line
-    expect(find.text('DANTE TERMINAL v0.1.0'), findsOneWidget);
+    expect(find.text('DANTE TERMINAL v0.2.0'), findsOneWidget);
 
     // Static info lines rendered in the terminal output
     expect(find.text('> AI-powered text adventure'), findsOneWidget);

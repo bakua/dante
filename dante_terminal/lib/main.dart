@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'services/inference_service.dart';
+import 'services/performance_metrics.dart';
+import 'screens/benchmark_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,14 +43,17 @@ class _TerminalScreenState extends State<TerminalScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<_TerminalLine> _lines = [];
   bool _isGenerating = false;
+  InferenceMetrics? _lastMetrics;
+
   static const _terminalGreen = Color(0xFF00FF41);
   static const _terminalDim = Color(0xFF00AA2A);
+  static const _metricsColor = Color(0xFF00886A);
 
   @override
   void initState() {
     super.initState();
-    _addLine('DANTE TERMINAL v0.1.0', isHeader: true);
-    _addLine('─' * 40);
+    _addLine('DANTE TERMINAL v0.2.0', isHeader: true);
+    _addLine('\u2500' * 40);
     _addLine('> AI-powered text adventure');
     _addLine('> Powered by on-device LLM');
     _addLine('> Runs entirely offline');
@@ -68,6 +73,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
         final modelPath = await _inference.loadModel();
         _addLine('[SYS] Model loaded: ${modelPath.split('/').last}');
         _addLine('[SYS] Ready. Type a prompt and press Enter.');
+        _addLine('[SYS] Type /benchmark to run performance tests.');
         setState(() {});
       } catch (e) {
         final modelDir = await _inference.getModelDirectory();
@@ -80,9 +86,9 @@ class _TerminalScreenState extends State<TerminalScreen> {
     }
   }
 
-  void _addLine(String text, {bool isHeader = false}) {
+  void _addLine(String text, {bool isHeader = false, bool isMetric = false}) {
     setState(() {
-      _lines.add(_TerminalLine(text, isHeader: isHeader));
+      _lines.add(_TerminalLine(text, isHeader: isHeader, isMetric: isMetric));
     });
     // Scroll to bottom after frame renders
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -104,6 +110,17 @@ class _TerminalScreenState extends State<TerminalScreen> {
     _addLine('');
     _addLine('> $prompt');
 
+    // Handle commands
+    if (prompt == '/benchmark') {
+      _openBenchmark();
+      return;
+    }
+
+    if (prompt == '/metrics') {
+      _showLastMetrics();
+      return;
+    }
+
     if (!_inference.isReady) {
       _addLine('[SYS] Model not loaded. Cannot generate response.');
       return;
@@ -112,16 +129,69 @@ class _TerminalScreenState extends State<TerminalScreen> {
     setState(() => _isGenerating = true);
 
     try {
-      final buffer = StringBuffer();
-      await for (final token in _inference.generate(prompt)) {
-        buffer.write(token);
+      final stopwatch = Stopwatch()..start();
+      int? ttftMs;
+      int tokenCount = 0;
+      final responseBuffer = StringBuffer();
+      double? peakMem = getCurrentMemoryMB();
+
+      await for (final token in _inference.generate(prompt, maxTokens: 150)) {
+        ttftMs ??= stopwatch.elapsedMilliseconds;
+        responseBuffer.write(token);
+        tokenCount++;
+
+        // Sample memory every 20 tokens
+        if (tokenCount % 20 == 0) {
+          final mem = getCurrentMemoryMB();
+          if (mem != null && (peakMem == null || mem > peakMem)) {
+            peakMem = mem;
+          }
+        }
       }
-      _addLine(buffer.toString());
+
+      stopwatch.stop();
+
+      // Display the response
+      _addLine(responseBuffer.toString());
+
+      // Capture and display metrics
+      final metrics = InferenceMetrics(
+        modelName: _inference.loadedModelPath?.split('/').last ?? 'unknown',
+        ttftMs: ttftMs ?? stopwatch.elapsedMilliseconds,
+        tokenCount: tokenCount,
+        totalTimeMs: stopwatch.elapsedMilliseconds,
+        peakMemoryMB: peakMem,
+        responseText: responseBuffer.toString(),
+      );
+
+      _lastMetrics = metrics;
+      _addLine(
+        '[PERF] TTFT: ${metrics.ttftSeconds.toStringAsFixed(2)}s | '
+        '${metrics.tokensPerSecond.toStringAsFixed(1)} tok/s | '
+        '$tokenCount tokens in ${stopwatch.elapsedMilliseconds}ms',
+        isMetric: true,
+      );
     } catch (e) {
       _addLine('[ERR] Generation failed: $e');
     }
 
     setState(() => _isGenerating = false);
+  }
+
+  void _showLastMetrics() {
+    if (_lastMetrics == null) {
+      _addLine('[SYS] No metrics yet. Generate a response first.');
+      return;
+    }
+    for (final line in _lastMetrics!.toSummary().split('\n')) {
+      if (line.isNotEmpty) _addLine('[PERF] $line', isMetric: true);
+    }
+  }
+
+  void _openBenchmark() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const BenchmarkScreen()),
+    );
   }
 
   @override
@@ -156,9 +226,11 @@ class _TerminalScreenState extends State<TerminalScreen> {
                             line.isHeader ? FontWeight.bold : FontWeight.normal,
                         color: line.text.startsWith('[ERR]')
                             ? Colors.red
-                            : line.text.startsWith('[SYS]')
-                                ? _terminalDim
-                                : _terminalGreen,
+                            : line.isMetric
+                                ? _metricsColor
+                                : line.text.startsWith('[SYS]')
+                                    ? _terminalDim
+                                    : _terminalGreen,
                         letterSpacing: line.isHeader ? 4 : 0,
                         height: 1.4,
                       ),
@@ -226,7 +298,8 @@ class _TerminalScreenState extends State<TerminalScreen> {
 class _TerminalLine {
   final String text;
   final bool isHeader;
-  const _TerminalLine(this.text, {this.isHeader = false});
+  final bool isMetric;
+  const _TerminalLine(this.text, {this.isHeader = false, this.isMetric = false});
 }
 
 /// A simple blinking cursor to indicate generation in progress.
