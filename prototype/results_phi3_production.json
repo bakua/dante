@@ -1,0 +1,148 @@
+{
+  "model_path": "./models/phi3-mini-4k-q4.gguf",
+  "model_name": "phi3-mini-4k-q4",
+  "n_ctx": 4096,
+  "prompt_variant": "production",
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output": "You slowly open your eyes to a warm, golden light filtering through the lush canopy of towering trees. The sun's rays gently caress your face as you find yourself lying on a bed of soft moss in an expansive meadow surrounded by vibrant flowers and ancient trees. A faint melody carried by the breeze fills your ears, harmonizing with the rustling leaves above.\n\nA gentle hum resonates from somewhere nearby, drawing your attention to a small wooden door nestled between two colossal trees at the edge of the clearing. As you sit up and take in your surroundings, an enchanting forest spirit appears before you - an ethereal being made of shimmering light with eyes radiating kindness and wisdom. The creature's voice, melodious yet warmly inviting, breaks the silence:\n\n\"Welcome to the realm of Eldoria, brave advent",
+      "output_length": 816,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 137,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 21,
+      "completion_tokens": 200,
+      "elapsed": 1.71,
+      "tok_per_sec": 117.2
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output": "You slowly open your eyes, finding yourself in a dimly-lit chamber that is adorned with ancient tapestries and mysterious artifacts. The room exudes an air of mystery and power. As you take a moment to adjust to the unfamiliar surroundings, you notice a heavy wooden door at one end of the chamber.\n\nThe walls are lined with bookshelves filled with countless volumes of weathered tomes bearing arcane symbols; their secrets seemingly waiting to be discovered. An intricate chessboard sits on an ornate table in front of you, with pieces carved from rare gemstones - a challenge for the mind and spirit.\n\nThe centerpiece is an ancient pedestal holding a glowing crystal orb that pulsates softly with unspoken energies. Above it hangs an ornate clockwork mechanism, adorned with intricate metalwork resembling",
+      "output_length": 807,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 130,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 230,
+      "completion_tokens": 200,
+      "elapsed": 1.73,
+      "tok_per_sec": 115.8
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output": "As you carefully explore the chamber, your hands come across an intricately designed leather satchel tucked away beneath a stack of dusty tomes. Its clasps are securely fastened with elaborate ironwork that whispers tales of past adventures. You gingerly unfasten it and discover several useful items:\n\n1. A compact, multi-purpose tool - a clever invention combining various functions from a knife to screwdriver, perfect for unexpected situations.\n2. A small vial containing a potent healing elixir, capable of mending wounds inflicted by both magic and nature's cruel hand.\n3. An assortment of grains - ranging in appearance from wheat to exotic seeds - representing sustenance for your journey ahead.\n4. A charmed compass that always points toward the nearest source of light, ensuring you can never lose your way within E",
+      "output_length": 825,
+      "has_suggestions": true,
+      "scores": {
+        "suggestion_compliance": 1,
+        "length_compliance": 3,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 2,
+        "composite": 2.2,
+        "word_count": 46,
+        "suggestion_count": 4
+      },
+      "prompt_tokens": 440,
+      "completion_tokens": 200,
+      "elapsed": 1.79,
+      "tok_per_sec": 112.0
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output": "With your newfound items securely stowed in your satchel, you make your way toward the northern door that beckons from afar. The wooden panel is crafted with intricate carvings depicting scenes of valiant heroes and ancient battles - a testament to the legends held within this realm of Eldoria.\n Faithfully, you turn the brass key found amidst your belongings in a small lock hidden amongst the woodwork. With a satisfying click, the door yields to your efforts, revealing an uncharted path veiled in shadows beyond its threshold. The scent of adventure hangs heavily in the air as you step through the archway, ready to embrace whatever challenges and wonders await you on this new journey within Eldoria's enigmatic heart.",
+      "output_length": 725,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 3,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.6,
+        "word_count": 119,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 649,
+      "completion_tokens": 178,
+      "elapsed": 1.65,
+      "tok_per_sec": 108.1
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output": "As you traverse the dimly lit corridor beyond the northern door, your eyes are drawn to the ancient tapestries that line its walls. Their rich colors and intricate designs hint at a deeper story waiting to be unraveled. Using a small hand mirror from your satchel's contents, you cast light upon the patterns etched into their fabric.\n\nTo your amazement, certain threads seem misplaced; some even appear slightly raised or worn down in comparison to others. Your heart quickens as you carefully press against these anomalies with your fingers, feeling for any indentation that may reveal a hidden mechanism or passageway. A soft click echoes through the silence - and like magic, two discreet stone slabs slide open from the wall's depths, unveiling a concealed alcove leading to an unknown realm within Eldoria.\n\nYour pulse quickens with excitement as you step into this secret",
+      "output_length": 878,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 144,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 840,
+      "completion_tokens": 200,
+      "elapsed": 1.92,
+      "tok_per_sec": 104.2
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output": "With your trusty torch in hand, its flame flickering with an inner fire that seems to match the boundless potential within you, you carefully ignite it. The warm glow casts dancing shadows upon the chamber's ancient stone walls and illuminates every nook and cranny as you advance through the corridor.\n\nAs your torchlight sweeps across the room, its beam reveals intricate frescoes depicting epic battles of yore and enigmatic symbols etched onto the chamber's surface - a cryptic language hinting at Eldoria's deep-seated mysteries. Your keen senses pick up subtle nuances previously unnoticed in the darkness: faint whispers carried by an unknown breeze, distant echoes of footsteps, and even the delicate scent of flora that seem to be growing within this hidden passageway.\n\nWith",
+      "output_length": 784,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 124,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1056,
+      "completion_tokens": 200,
+      "elapsed": 2.0,
+      "tok_per_sec": 100.1
+    }
+  ],
+  "total_time": 10.8,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 6,
+  "suggestion_rate": 0.17,
+  "aggregate_scores": {
+    "suggestion_compliance": 0.17,
+    "length_compliance": 2.33,
+    "sensory_detail": 5.0,
+    "suggestion_quality": 0.0,
+    "format_quality": 0.33,
+    "composite": 1.57,
+    "avg_word_count": 116.7
+  }
+}

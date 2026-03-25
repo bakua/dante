@@ -1,0 +1,148 @@
+{
+  "model_path": "./models/tinyllama-1.1b-chat-q4km.gguf",
+  "model_name": "tinyllama-1.1b-chat-q4km",
+  "n_ctx": 2048,
+  "prompt_variant": "production",
+  "turns": [
+    {
+      "turn": 0,
+      "input": "(opening)",
+      "output": "GAME GM: Welcome to Dante Terminal, where the player awakens in a dimly lit room. The air is thick with dust and the only sound is that of your own breathing. You find yourself lying on a worn cot, your wrists bound in an ornate chain. The only light comes from a flickering candle, casting eerie shadows on the walls.\n\nAs you sit up, you notice that your clothes and shoes are gone \u2014 replaced by something else entirely. A black leather jacket, with its sleeves rolled down, hangs from the wall at your left. On it is a map, which you realize looks familiar. But what does it signify?\n\nGAME GM: You've awoken in the Dante Terminal \u2014 an underground facility for those deemed mentally unfit, and now you must navigate its twisting corridors, solving riddles and puzzles",
+      "output_length": 768,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 139,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 286,
+      "completion_tokens": 200,
+      "elapsed": 0.76,
+      "tok_per_sec": 262.3
+    },
+    {
+      "turn": 1,
+      "input": "Look around the room carefully",
+      "output": "GAME GM: Du'ssthrough the room, a few chairs and tables are scattered around. The walls are covered with old books and newspapers, some of them torn and out of place. On one corner, you see a shelf with a number of dusty bottles. The smell is musty and old-fashioned, but you can't quite pinpoint the scent.\n\nThe air here feels stale and damp, almost like the environment around you. You try to turn your head, but it seems to be stuck on a spot you haven't visited yet. The room looks like it could have been there for ages; there are no signs of cleaning or maintenance.\n\nGAME GM: Your eyes continue to scan the room. You notice several books piled up in one corner. Each one is covered in dust, and their binding seems to be fraying from old use. One book stands",
+      "output_length": 765,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.4,
+        "word_count": 144,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 543,
+      "completion_tokens": 200,
+      "elapsed": 0.78,
+      "tok_per_sec": 257.6
+    },
+    {
+      "turn": 2,
+      "input": "Pick up anything that looks useful",
+      "output": "GAME GM: You reach out with your free hand to pick up a book from the corner of the room. The book seems to be made of a soft, yellowish material, but as you take a closer look, you notice that it is covered in an almost unreadable writing.\n\nYou hesitantly open the cover and find yourself staring at a series of riddles. Each one challenges your reasoning skills, and you realize that they could be used to crack into this facility's codes and secrets.\n\nGAME GM: The puzzle book contains dozens of pages, each with intricate riddles and ciphers designed to confuse the player. You can't help but think about the people who worked in this place, how they must have spent so much time deciphering these mysteries.\n\nAs you continue reading, you realize that these riddles are not just for entertainment \u2014 they",
+      "output_length": 807,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 0,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 0.4,
+        "word_count": 145,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 801,
+      "completion_tokens": 200,
+      "elapsed": 0.82,
+      "tok_per_sec": 243.4
+    },
+    {
+      "turn": 3,
+      "input": "Go through the northern door",
+      "output": "GAME GM: The northern door is the only one that does not lock behind you. As you push it open, the room inside appears to be in ruins. The air is thick with dust and the only sound is that of your own breathing.\n\nYou follow the lead, following a trail of crumbling bricks, as if they could take you somewhere. But no matter how hard you try, you can't find an exit. Every time you turn a corner, the door is closing infront of you.\n\nGAME GM: Your heart beats faster with each new realization that this place has been abandoned for centuries. You know that you will never be able to escape from this place, that it belongs to those who came before you. You feel like a ghost, lost within these walls.\n\nThe air is heavy with the scent of rot and decay, the only sounds being the distant rumble of an unknown force within",
+      "output_length": 818,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 158,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1063,
+      "completion_tokens": 200,
+      "elapsed": 0.86,
+      "tok_per_sec": 233.5
+    },
+    {
+      "turn": 4,
+      "input": "Examine the walls for hidden passages",
+      "output": "GAME GM: The walls of the Dante Terminal are covered with cobwebs, and you can hardly see through them. You move closer to the wall, trying to find any sign of hidden passageways. As you do so, you notice some strange symbols etched onto one of the bricks.\n\nYou can't quite make out the insignia, but it seems to be a series of lines and circles. It's not entirely clear what they might represent, but you know that these are not ordinary wall decorations. You decide to continue your examination of the walls, hoping to uncover some clue to your surroundings.\n\nGAME GM: As you keep moving towards the bricks, you notice something shiny at the bottom of one of them. It's a small key, with an ornate design etched onto it. You realize that this must be the entrance to another room in the Dante Terminal.",
+      "output_length": 804,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 2,
+        "sensory_detail": 2,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 0.8,
+        "word_count": 147,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1325,
+      "completion_tokens": 200,
+      "elapsed": 0.9,
+      "tok_per_sec": 222.7
+    },
+    {
+      "turn": 5,
+      "input": "Use the torch to light up the dark corridor",
+      "output": "GAME GM: The room is dimly lit, with only a single torch in the center. You know that you have to proceed cautiously here as there might be something lurking in the shadows.\n\nAs you move further into the corner, you notice a faint glow emanating from behind a crack in the wall. The light is so dim that it's almost impossible to make out what's happening inside. You slowly approach the crack and use your flashlight to reveal an opening into another room.\n\nGAME GM: As you make your way back down the corridor, you come across a smaller, more confined space. The walls are covered in moss and there is no sign of any other exit. You can't help but feel that this might be the last place you ever find yourself in this mysterious facility.\n\nBut as you make your way back up the stairs, something unexpected happens",
+      "output_length": 815,
+      "has_suggestions": false,
+      "scores": {
+        "suggestion_compliance": 0,
+        "length_compliance": 0,
+        "sensory_detail": 5,
+        "suggestion_quality": 0,
+        "format_quality": 0,
+        "composite": 1.0,
+        "word_count": 151,
+        "suggestion_count": 0
+      },
+      "prompt_tokens": 1354,
+      "completion_tokens": 200,
+      "elapsed": 1.08,
+      "tok_per_sec": 185.6
+    }
+  ],
+  "total_time": 5.2,
+  "errors": [],
+  "coherence_maintained": true,
+  "turns_completed": 6,
+  "suggestion_rate": 0.0,
+  "aggregate_scores": {
+    "suggestion_compliance": 0.0,
+    "length_compliance": 1.33,
+    "sensory_detail": 3.67,
+    "suggestion_quality": 0.0,
+    "format_quality": 0.0,
+    "composite": 1.0,
+    "avg_word_count": 147.3
+  }
+}
