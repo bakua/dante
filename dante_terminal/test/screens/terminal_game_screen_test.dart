@@ -273,5 +273,162 @@ void main() {
       // After animation completes, cursor should be gone (send icon instead).
       expect(find.text('\u2588'), findsNothing);
     });
+
+    // ─── BL-165: Accessibility fixes ─────────────────────────────────
+
+    group('accessibility', () {
+      // ── Color contrast ─────────────────────────────────────────────
+
+      testWidgets('hint text color meets WCAG AA 4.5:1 contrast',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        // Find the TextField and verify hint color is no longer #004D15.
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final hintColor = textField.decoration?.hintStyle?.color;
+        // Old failing color was 0xFF004D15 (1.95:1 ratio).
+        // New color should be 0xFF33884D (~4.5:1 ratio).
+        expect(hintColor, isNot(const Color(0xFF004D15)));
+        expect(hintColor, const Color(0xFF33884D));
+      });
+
+      // ── Touch targets ──────────────────────────────────────────────
+
+      testWidgets('suggestion chips have at least 48px touch targets',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(
+              suggestions: ['Look around', 'Open door', 'Check inventory'],
+            ),
+          ),
+        );
+
+        // Find chip containers via their text children.
+        final chipFinder = find.text('1. Look around');
+        expect(chipFinder, findsOneWidget);
+
+        // Walk up to the Container with constraints.
+        final container = tester.widget<Container>(
+          find.ancestor(
+            of: chipFinder,
+            matching: find.byType(Container),
+          ).first,
+        );
+
+        expect(container.constraints?.minHeight, greaterThanOrEqualTo(48));
+        expect(container.constraints?.minWidth, greaterThanOrEqualTo(48));
+      });
+
+      testWidgets('send button has at least 48x48 touch target',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        final iconButton =
+            tester.widget<IconButton>(find.byType(IconButton));
+        expect(iconButton.constraints?.minWidth, greaterThanOrEqualTo(48));
+        expect(iconButton.constraints?.minHeight, greaterThanOrEqualTo(48));
+      });
+
+      testWidgets('send button has tooltip for screen readers',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        final iconButton =
+            tester.widget<IconButton>(find.byType(IconButton));
+        expect(iconButton.tooltip, 'Send command');
+      });
+
+      // ── Reduce motion ──────────────────────────────────────────────
+
+      testWidgets(
+          'typewriter shows text instantly when disableAnimations is true',
+          (WidgetTester tester) async {
+        final controller = StreamController<String>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) {
+              return MediaQuery(
+                data:
+                    MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              );
+            },
+            home: TerminalGameScreen(
+              responseStream: controller.stream,
+            ),
+          ),
+        );
+
+        // Emit tokens.
+        controller.add('Hello world');
+        await tester.pump(); // Process stream event.
+
+        // With reduce motion, text should appear immediately — no need
+        // to pump multiple 18ms ticks.
+        expect(find.textContaining('Hello world'), findsOneWidget);
+
+        // Close stream to finalize.
+        await controller.close();
+        await tester.pump();
+
+        // Finalized text should be in history.
+        expect(find.text('Hello world'), findsOneWidget);
+      });
+
+      testWidgets(
+          'blinking cursor is static when disableAnimations is true',
+          (WidgetTester tester) async {
+        final controller = StreamController<String>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) {
+              return MediaQuery(
+                data:
+                    MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              );
+            },
+            home: TerminalGameScreen(
+              responseStream: controller.stream,
+            ),
+          ),
+        );
+
+        controller.add('tok');
+        await tester.pump();
+
+        // Cursor should be present.
+        expect(find.text('\u2588'), findsOneWidget);
+
+        // With reduce motion, the cursor's own FadeTransition should NOT
+        // be present. Check specifically for a FadeTransition whose
+        // direct child is the cursor Text (excludes Navigator transitions).
+        final cursorFade = find.byWidgetPredicate(
+          (widget) =>
+              widget is FadeTransition &&
+              widget.child is Text &&
+              (widget.child as Text).data == '\u2588',
+        );
+        expect(cursorFade, findsNothing);
+
+        await controller.close();
+        await tester.pump();
+      });
+    });
   });
 }

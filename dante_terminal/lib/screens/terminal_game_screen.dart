@@ -158,6 +158,10 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
   StreamSubscription<String>? _streamSub;
   Timer? _typewriterTimer;
 
+  /// Whether the platform requests reduced motion (e.g. iOS "Reduce Motion").
+  /// Cached from [MediaQuery.disableAnimations] in [didChangeDependencies].
+  bool _reduceMotion = false;
+
   /// Typewriter pacing: milliseconds between each character reveal.
   static const _kTypewriterDelayMs = 18;
 
@@ -170,6 +174,12 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
     super.initState();
     _messages.addAll(widget.initialMessages);
     _subscribeToStream();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.of(context).disableAnimations;
   }
 
   @override
@@ -220,13 +230,28 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
 
     _streamSub = stream.listen(
       (token) {
-        _pendingChars.addAll(token.split(''));
-        _ensureTypewriterRunning();
+        if (_reduceMotion) {
+          // Instant reveal: skip character-by-character animation.
+          setState(() => _typewriterBuffer += token);
+          _scrollToBottom();
+        } else {
+          _pendingChars.addAll(token.split(''));
+          _ensureTypewriterRunning();
+        }
       },
       onDone: () {
         _streamDone = true;
-        // If no pending chars remain, finalize immediately.
-        if (_pendingChars.isEmpty && _typewriterTimer?.isActive != true) {
+        if (_reduceMotion) {
+          // Flush any remaining content and finalize immediately.
+          if (_pendingChars.isNotEmpty) {
+            setState(() {
+              _typewriterBuffer += _pendingChars.join('');
+              _pendingChars.clear();
+            });
+          }
+          _finalizeResponse();
+        } else if (_pendingChars.isEmpty &&
+            _typewriterTimer?.isActive != true) {
           _finalizeResponse();
         }
       },
@@ -332,11 +357,16 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeOut,
-        );
+        if (_reduceMotion) {
+          _scrollController
+              .jumpTo(_scrollController.position.maxScrollExtent);
+        } else {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeOut,
+          );
+        }
       }
     });
   }
@@ -406,7 +436,9 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
             onTap: () => _onSuggestionTap(text),
             child: Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              constraints:
+                  const BoxConstraints(minHeight: 48, minWidth: 48),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: kSuggestionColor.withAlpha(153),
@@ -458,7 +490,7 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
               hintStyle: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 16,
-                color: Color(0xFF004D15),
+                color: Color(0xFF33884D),
               ),
             ),
           ),
@@ -469,8 +501,9 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
           IconButton(
             icon: const Icon(Icons.send, color: kTerminalGreen, size: 20),
             onPressed: _onSubmit,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+            tooltip: 'Send command',
+            constraints:
+                const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
       ],
     );
@@ -568,6 +601,19 @@ class _BlinkingTerminalCursorState extends State<_BlinkingTerminalCursor>
 
   @override
   Widget build(BuildContext context) {
+    // When "Reduce Motion" is enabled, show a static cursor instead of
+    // animating (WCAG 2.3.3 / Apple HIG requirement).
+    if (MediaQuery.of(context).disableAnimations) {
+      return const Text(
+        '\u2588',
+        style: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 20,
+          color: kTerminalGreen,
+        ),
+      );
+    }
+
     return FadeTransition(
       opacity: _controller,
       child: const Text(
