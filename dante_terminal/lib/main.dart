@@ -6,11 +6,13 @@ import 'package:path_provider/path_provider.dart';
 import 'config/model_config.dart';
 import 'models/adventure_data.dart';
 import 'screens/benchmark_screen.dart';
+import 'screens/game_orchestrator.dart';
 import 'screens/model_download_screen.dart';
 import 'services/adventure_loader.dart';
 import 'services/game_assets.dart';
 import 'services/game_session.dart';
 import 'services/inference_service.dart';
+import 'services/mock_inference_backend.dart';
 import 'services/performance_metrics.dart';
 
 void main() {
@@ -55,6 +57,9 @@ class _AppLauncher extends StatefulWidget {
 class _AppLauncherState extends State<_AppLauncher> {
   bool _checking = true;
   bool _modelFound = false;
+
+  /// Lazily created mock backend for desktop/CI mode.
+  late final MockInferenceBackend _mockBackend = MockInferenceBackend();
 
   @override
   void initState() {
@@ -102,6 +107,15 @@ class _AppLauncherState extends State<_AppLauncher> {
       return const TerminalScreen();
     }
 
+    // No model found: desktop/CI → mock backend game, mobile → download screen.
+    // On desktop, llama.cpp FFI may not be available and there's no model to
+    // download, so we use the mock backend for a playable demo experience.
+    if (_isDesktopPlatform()) {
+      return GameOrchestrator(
+        generateFunction: _mockBackend.generate,
+      );
+    }
+
     return ModelDownloadScreen(
       onDownloadComplete: () {
         if (mounted) setState(() => _modelFound = true);
@@ -111,6 +125,18 @@ class _AppLauncherState extends State<_AppLauncher> {
       modelFileName: ModelConfig.fileName,
       expectedFileSize: ModelConfig.expectedFileSize,
     );
+  }
+
+  /// Whether the app is running on a desktop platform (macOS, Linux, Windows).
+  ///
+  /// Used to determine whether to use the mock inference backend (desktop/CI)
+  /// or show the model download screen (mobile).
+  static bool _isDesktopPlatform() {
+    try {
+      return Platform.isMacOS || Platform.isLinux || Platform.isWindows;
+    } catch (_) {
+      return false;
+    }
   }
 }
 
