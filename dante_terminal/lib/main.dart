@@ -44,7 +44,8 @@ class TerminalScreen extends StatefulWidget {
   State<TerminalScreen> createState() => _TerminalScreenState();
 }
 
-class _TerminalScreenState extends State<TerminalScreen> {
+class _TerminalScreenState extends State<TerminalScreen>
+    with WidgetsBindingObserver {
   final InferenceService _inference = InferenceService();
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -60,10 +61,25 @@ class _TerminalScreenState extends State<TerminalScreen> {
   List<String> _currentSuggestions = [];
   String? _grammarTempPath;
 
+  /// Path to the save file in app documents directory (BL-118).
+  String? _saveFilePath;
+
+  /// Adventure ID used for save/restore matching.
+  String? _adventureId;
+
+  /// True while waiting for user to choose Continue vs New Adventure.
+  bool _awaitingResumeChoice = false;
+
+  /// Cached save data when offering the resume choice.
+  Map<String, dynamic>? _pendingSaveData;
+
   static const _terminalGreen = Color(0xFF00FF41);
   static const _terminalDim = Color(0xFF00AA2A);
   static const _metricsColor = Color(0xFF00886A);
   static const _suggestionColor = Color(0xFF00CC55);
+
+  /// Save file name within app documents directory.
+  static const _kSaveFileName = 'dante_save.json';
 
   /// Typewriter pacing: milliseconds between each displayed character.
   static const _typewriterDelayMs = 20;
@@ -71,6 +87,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _addLine('DANTE TERMINAL v0.2.0', isHeader: true);
     _addLine('\u2500' * 40);
     _addLine('> AI-powered text adventure');
@@ -80,7 +97,35 @@ class _TerminalScreenState extends State<TerminalScreen> {
     _initEngine();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _autoSave();
+    }
+  }
+
+  /// Persist current game state to disk (BL-118).
+  Future<void> _autoSave() async {
+    final session = _gameSession;
+    final path = _saveFilePath;
+    if (session == null || path == null) return;
+    if (session.history.isEmpty) return;
+    try {
+      await session.saveState(path, adventureId: _adventureId);
+    } catch (_) {
+      // Best-effort save; don't crash the app.
+    }
+  }
+
   Future<void> _initEngine() async {
+    // Resolve save file path early (BL-118).
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      _saveFilePath = '${docsDir.path}/$_kSaveFileName';
+    } catch (_) {
+      // path_provider may fail in test harnesses; continue without save.
+    }
+
     _addLine('[SYS] Initializing inference engine...');
     try {
       await _inference.initialize();
@@ -92,8 +137,8 @@ class _TerminalScreenState extends State<TerminalScreen> {
         final modelPath = await _inference.loadModel();
         _addLine('[SYS] Model loaded: ${modelPath.split('/').last}');
 
-        // Initialize game session with adventure data and auto-generate opening
-        await _initGameSession();
+        // Check for saved game before starting fresh (BL-118).
+        await _checkForSavedGame();
 
         setState(() {});
       } catch (e) {
@@ -107,13 +152,92 @@ class _TerminalScreenState extends State<TerminalScreen> {
     }
   }
 
+  /// Check for an existing save file and offer resume or new game (BL-118).
+  Future<void> _checkForSavedGame() async {
+    final path = _saveFilePath;
+    if (path == null) {
+      await _initGameSession();
+      return;
+    }
+
+    final saveData = await GameSession.loadSaveData(path);
+    if (saveData != null) {
+      final turnCount = saveData['turnNumber'] as int? ?? 0;
+      final savedAdventure = saveData['adventureId'] as String? ?? 'unknown';
+      _addLine('');
+      _addLine('[SYS] Saved game found: $savedAdventure (Turn $turnCount)');
+      _addLine('');
+      _addLine('  1. Continue adventure');
+      _addLine('  2. New adventure');
+      _addLine('');
+      _addLine('[SYS] Type 1 or 2 to choose.');
+      _pendingSaveData = saveData;
+      setState(() => _awaitingResumeChoice = true);
+    } else {
+      await _initGameSession();
+    }
+  }
+
+  /// Restore a GameSession from saved data (BL-118).
+  Future<void> _restoreGameSession(Map<String, dynamic> saveData) async {
+    try {
+      _addLine('[SYS] Restoring saved game...');
+
+      final savedAdventureId = saveData['adventureId'] as String? ?? 'sunken_archive';
+      _adventureId = savedAdventureId;
+
+      // Load adventure and assets (same as _initGameSession)
+      _adventure = await _adventureLoader.load(savedAdventureId);
+      final assets = await _gameAssets.loadAll();
+
+      final docsDir = await getApplicationDocumentsDirectory();
+      _grammarTempPath = '${docsDir.path}/game_master.gbnf';
+      await File(_grammarTempPath!).writeAsString(assets.grammar);
+
+      final systemPrompt = _buildSystemPrompt(assets.prompt, _adventure!);
+
+      _gameSession = GameSession(
+        systemPrompt: systemPrompt,
+        generate: _inference.generate,
+        grammarFilePath: _grammarTempPath,
+      );
+
+      // Restore turn history into the session.
+      _gameSession!.restoreFromSaveData(saveData);
+
+      // Display adventure header
+      _addLine('');
+      _addLine('\u2550' * 40);
+      _addLine('  ${_adventure!.title.toUpperCase()}');
+      _addLine('\u2550' * 40);
+      _addLine('');
+
+      // Show the last turn's narrative and suggestions so the player
+      // has context for what was happening.
+      final history = _gameSession!.history;
+      if (history.isNotEmpty) {
+        final lastTurn = history.last;
+        _addLine(lastTurn.narrativeText);
+        _displaySuggestions(lastTurn.suggestions);
+        _addLine('');
+        _addLine('[SYS] Game restored at turn ${lastTurn.turnNumber}. '
+            'What do you do?');
+      }
+    } catch (e) {
+      _addLine('[ERR] Restore failed: $e');
+      _addLine('[SYS] Starting new adventure instead...');
+      await _initGameSession();
+    }
+  }
+
   /// Load adventure data and assets, create [GameSession], generate opening.
   Future<void> _initGameSession() async {
     try {
       _addLine('[SYS] Loading adventure...');
 
       // Load adventure scenario data from bundled JSON
-      _adventure = await _adventureLoader.load('sunken_archive');
+      _adventureId = 'sunken_archive';
+      _adventure = await _adventureLoader.load(_adventureId!);
       _addLine('[SYS] Adventure: ${_adventure!.title}');
 
       // Load system prompt and grammar from bundled assets
@@ -437,6 +561,12 @@ class _TerminalScreenState extends State<TerminalScreen> {
     _addLine('');
     _addLine('> $command');
 
+    // ── Handle Continue vs New Adventure choice (BL-118) ──
+    if (_awaitingResumeChoice) {
+      await _handleResumeChoice(command);
+      return;
+    }
+
     // Handle system commands
     if (command == '/benchmark') {
       _openBenchmark();
@@ -473,6 +603,8 @@ class _TerminalScreenState extends State<TerminalScreen> {
             totalTimeMs: result.totalTimeMs,
             rawResponse: result.turn!.rawResponse,
           );
+          // Auto-save after each completed turn (BL-118).
+          await _autoSave();
         }
       } else {
         // ── Fallback: raw InferenceService with typewriter animation ──
@@ -505,6 +637,32 @@ class _TerminalScreenState extends State<TerminalScreen> {
     setState(() => _isGenerating = false);
   }
 
+  /// Handle the user's choice between Continue and New Adventure (BL-118).
+  Future<void> _handleResumeChoice(String command) async {
+    final choice = command.trim().toLowerCase();
+    setState(() => _awaitingResumeChoice = false);
+
+    if (choice == '1' || choice == 'continue') {
+      final saveData = _pendingSaveData;
+      _pendingSaveData = null;
+      if (saveData != null) {
+        await _restoreGameSession(saveData);
+      } else {
+        await _initGameSession();
+      }
+    } else if (choice == '2' || choice == 'new') {
+      _pendingSaveData = null;
+      // Delete old save before starting fresh.
+      if (_saveFilePath != null) {
+        await GameSession.deleteSave(_saveFilePath!);
+      }
+      await _initGameSession();
+    } else {
+      _addLine('[SYS] Please type 1 (continue) or 2 (new adventure).');
+      setState(() => _awaitingResumeChoice = true);
+    }
+  }
+
   void _showLastMetrics() {
     if (_lastMetrics == null) {
       _addLine('[SYS] No metrics yet. Generate a response first.');
@@ -523,6 +681,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _inference.dispose();
     _inputController.dispose();
     _scrollController.dispose();

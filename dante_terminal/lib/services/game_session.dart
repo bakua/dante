@@ -1,18 +1,26 @@
-/// Game session service managing turn history, prompt assembly, and suggestion
-/// parsing for DANTE TERMINAL.
+/// Game session service managing turn history, prompt assembly, suggestion
+/// parsing, and game state persistence for DANTE TERMINAL.
 ///
 /// This is the 'controller' layer between the UI (BL-039) and the inference
 /// engine (BL-038). It consumes player input strings and produces structured
 /// [GameTurn] objects containing narrative text and suggestions.
 ///
-/// Ported from prototype/dante_cli.py's GameSession class. Designed as a pure
-/// Dart class with no Flutter UI dependencies for independent unit testing.
+/// Persistence (BL-118): [saveState] serializes the session to a JSON file
+/// and [restoreFromSaveData] rebuilds it, enabling save-on-exit / resume-on-
+/// launch. The actual file path comes from the UI layer (via path_provider).
+///
+/// Ported from prototype/dante_cli.py's GameSession class. Uses only dart:core,
+/// dart:convert, and dart:io for independent unit testing (no Flutter imports).
 ///
 /// See also:
 /// - BL-010: GM prompt patterns (system prompt + anchor note strategy)
 /// - BL-036: Small-model prompting techniques (recency-bias exploitation)
 /// - BL-049: GBNF grammar for structured output enforcement
+/// - BL-118: Game state persistence
 library;
+
+import 'dart:convert';
+import 'dart:io';
 
 /// Style anchor injected near the generation point to exploit recency bias
 /// and maintain persona/format compliance (BL-036 section 2.3).
@@ -108,6 +116,27 @@ class GameTurn {
       isComplete: isComplete ?? this.isComplete,
     );
   }
+
+  /// Serialize this turn to a JSON-compatible map.
+  Map<String, dynamic> toJson() => {
+        'turnNumber': turnNumber,
+        'playerCommand': playerCommand,
+        'narrativeText': narrativeText,
+        'suggestions': suggestions,
+        'rawResponse': rawResponse,
+        'isComplete': isComplete,
+      };
+
+  /// Deserialize a turn from a JSON map (produced by [toJson]).
+  factory GameTurn.fromJson(Map<String, dynamic> json) => GameTurn(
+        turnNumber: json['turnNumber'] as int,
+        playerCommand: json['playerCommand'] as String,
+        narrativeText: json['narrativeText'] as String,
+        suggestions:
+            (json['suggestions'] as List<dynamic>).cast<String>().toList(),
+        rawResponse: json['rawResponse'] as String? ?? '',
+        isComplete: json['isComplete'] as bool? ?? true,
+      );
 
   @override
   String toString() =>
@@ -353,6 +382,63 @@ class GameSession {
   void reset() {
     _history.clear();
     _turnNumber = 0;
+  }
+
+  // ─── Persistence (BL-118) ────────────────────────────────────────────────
+
+  /// Serialize and write the current session state to [filePath].
+  ///
+  /// The JSON contains the adventure ID (for matching on restore), turn
+  /// count, full turn history, and a UTC timestamp. Called automatically
+  /// after each completed turn and when the app enters background.
+  Future<void> saveState(String filePath, {String? adventureId}) async {
+    final data = <String, dynamic>{
+      'adventureId': adventureId,
+      'turnNumber': _turnNumber,
+      'turns': _history.map((t) => t.toJson()).toList(),
+      'savedAt': DateTime.now().toUtc().toIso8601String(),
+    };
+    final file = File(filePath);
+    await file.parent.create(recursive: true);
+    await file.writeAsString(jsonEncode(data));
+  }
+
+  /// Read and parse save data from [filePath].
+  ///
+  /// Returns `null` if the file does not exist or is corrupted. The caller
+  /// should inspect `adventureId` to decide whether to offer 'Continue'.
+  static Future<Map<String, dynamic>?> loadSaveData(String filePath) async {
+    final file = File(filePath);
+    if (!file.existsSync()) return null;
+    try {
+      final contents = await file.readAsString();
+      final json = jsonDecode(contents);
+      if (json is Map<String, dynamic>) return json;
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Restore internal state from save data produced by [saveState].
+  ///
+  /// Replaces current history and turn counter. Call on a freshly
+  /// constructed [GameSession] before the first [submitCommand].
+  void restoreFromSaveData(Map<String, dynamic> data) {
+    _turnNumber = data['turnNumber'] as int? ?? 0;
+    final turnsList = data['turns'] as List<dynamic>? ?? [];
+    _history.clear();
+    for (final entry in turnsList) {
+      _history.add(GameTurn.fromJson(entry as Map<String, dynamic>));
+    }
+  }
+
+  /// Delete the save file at [filePath], if it exists.
+  static Future<void> deleteSave(String filePath) async {
+    final file = File(filePath);
+    if (file.existsSync()) {
+      await file.delete();
+    }
   }
 
   // ─── Public helpers ──────────────────────────────────────────────────────
