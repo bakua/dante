@@ -1,0 +1,532 @@
+{
+  "id": "sunken_archive",
+  "title": "The Sunken Archive",
+  "theme": "Classic dungeon crawl",
+  "openingNarrative": "You wake on stone. Cold, damp, and wrong — the kind of cold that means you're underground and have been for a while. Behind you, the stairway is a wall of rubble. Your oil lamp sits beside you, flame low but stubborn. Ahead, a vaulted corridor exhales stale air that tastes of copper and old paper. Water pools in the cracks between flagstones, and somewhere ahead, something drips with metronomic patience. You don't remember coming down here. The Archive remembers you.",
+  "startLocationId": "antechamber",
+  "startInventory": ["oil_lamp"],
+  "locations": [
+    {
+      "id": "antechamber",
+      "name": "The Antechamber",
+      "description": "Collapsed stairway, rubble blocks exit upward. Floor mosaic: open book in chains. Water seeps through debris. One corridor leads north to Main Hall. The Codex Umbra can unseal the stairway exit.",
+      "keywords": ["antechamber", "start", "entrance", "stairway", "rubble"],
+      "atmosphere": "Claustrophobic, silent",
+      "exits": [
+        {
+          "direction": "north",
+          "targetLocationId": "main_hall"
+        },
+        {
+          "direction": "up",
+          "targetLocationId": "surface",
+          "blocked": true,
+          "blockedBy": "Collapsed stairway sealed by rubble — only the Codex Umbra can unseal it",
+          "requiredFlag": "codex_taken"
+        }
+      ],
+      "itemIds": [],
+      "npcIds": []
+    },
+    {
+      "id": "east_wing",
+      "name": "The East Wing",
+      "description": "Ankle-deep dark water. Leaning bookshelves, waterlogged books. Collapsed reading desk with metallic glint underneath. Water flows north. One readable shelf mentions the Cipher for Restricted texts. Exits: west to Main Hall, north to Flooded Passage.",
+      "keywords": ["east wing", "waterlogged", "stacks", "shelves", "desk"],
+      "atmosphere": "Ruined, melancholy",
+      "exits": [
+        {
+          "direction": "west",
+          "targetLocationId": "main_hall"
+        },
+        {
+          "direction": "north",
+          "targetLocationId": "flooded_passage"
+        }
+      ],
+      "itemIds": ["brass_key"],
+      "npcIds": []
+    },
+    {
+      "id": "main_hall",
+      "name": "The Main Hall",
+      "description": "Central vaulted corridor. Bioluminescent fungus on ceiling casts blue-green glow, reacts to loud sounds. Floor mosaic shows robed figures carrying books into a spiral. Water stream flows south. Exits: south, east, west, north.",
+      "keywords": ["main hall", "corridor", "mosaic", "fungus", "hub"],
+      "atmosphere": "Grand decay, underwater feeling",
+      "exits": [
+        {
+          "direction": "south",
+          "targetLocationId": "antechamber"
+        },
+        {
+          "direction": "east",
+          "targetLocationId": "east_wing"
+        },
+        {
+          "direction": "west",
+          "targetLocationId": "west_wing"
+        },
+        {
+          "direction": "north",
+          "targetLocationId": "circulation_desk"
+        }
+      ],
+      "itemIds": [],
+      "npcIds": []
+    },
+    {
+      "id": "west_wing",
+      "name": "The West Wing",
+      "description": "Bone-dry, warm air. Glass display cases, most shattered. One intact case with wax seal holds the Archivist's Journal. Cabinet drawer contains glass vial of solvent. Ceiling timbers creak. Exit: east to Main Hall.",
+      "keywords": ["west wing", "display case", "manuscripts", "dry", "rare"],
+      "atmosphere": "Hushed, museum-like",
+      "exits": [
+        {
+          "direction": "east",
+          "targetLocationId": "main_hall"
+        }
+      ],
+      "itemIds": ["archivists_journal", "glass_vial_solvent"],
+      "npcIds": []
+    },
+    {
+      "id": "flooded_passage",
+      "name": "The Flooded Passage",
+      "description": "Waist-deep black water, narrow walls, low ceiling. Sound distorts. Waterproof satchel on peg above water. Submerged shelf holds sealed lamp oil. Visible high-water mark above current level. Exits: south to East Wing, west to Circulation Desk.",
+      "keywords": ["flooded passage", "waist-deep", "water", "dark water", "passage"],
+      "atmosphere": "Primal fear, vulnerability",
+      "exits": [
+        {
+          "direction": "south",
+          "targetLocationId": "east_wing"
+        },
+        {
+          "direction": "west",
+          "targetLocationId": "circulation_desk"
+        }
+      ],
+      "itemIds": ["waterproof_satchel"],
+      "npcIds": []
+    },
+    {
+      "id": "circulation_desk",
+      "name": "The Circulation Desk",
+      "description": "Hexagonal chamber with massive stone desk. Chained leather ledger. Polished brass bell summons the Cataloger. Iron gate north to Restricted Section needs brass key. Exits: south, east, west, north (locked).",
+      "keywords": ["circulation desk", "desk", "ledger", "bell", "catalog"],
+      "atmosphere": "Bureaucratic order amid chaos",
+      "exits": [
+        {
+          "direction": "south",
+          "targetLocationId": "main_hall"
+        },
+        {
+          "direction": "east",
+          "targetLocationId": "flooded_passage"
+        },
+        {
+          "direction": "west",
+          "targetLocationId": "reading_room"
+        },
+        {
+          "direction": "north",
+          "targetLocationId": "restricted_section",
+          "blocked": true,
+          "blockedBy": "Iron gate locked — requires the Brass Key or Cataloger bypass with Archivist's Journal",
+          "requiredFlag": "gate_opened"
+        }
+      ],
+      "itemIds": [],
+      "npcIds": ["the_cataloger"]
+    },
+    {
+      "id": "reading_room",
+      "name": "The Reading Room",
+      "description": "Large domed chamber. Star map mural — constellations subtly wrong. Collapsed tables and chairs. Cold stone fire pit with oversized scorch marks forming Archive seal. Cipher Wheel hidden in hollowed book near fire pit. Exits: east, south.",
+      "keywords": ["reading room", "mural", "dome", "constellations", "firepit"],
+      "atmosphere": "Vast, echoing, exposed",
+      "exits": [
+        {
+          "direction": "east",
+          "targetLocationId": "circulation_desk"
+        },
+        {
+          "direction": "south",
+          "targetLocationId": "west_wing"
+        }
+      ],
+      "itemIds": ["cipher_wheel"],
+      "npcIds": ["maren"]
+    },
+    {
+      "id": "restricted_section",
+      "name": "The Restricted Section",
+      "description": "Carved from bedrock. Books chained to shelves, spines inward. Air thick and warm. Darkness unnaturally dense. Low hum from below. One scorched shelf — Codex Umbra's original location. The Warden manifests near spiral staircase. Exits: south, down (after Warden).",
+      "keywords": ["restricted section", "chained books", "chains", "iron gate", "warden"],
+      "atmosphere": "Oppressive, sacred, dangerous",
+      "exits": [
+        {
+          "direction": "south",
+          "targetLocationId": "circulation_desk"
+        },
+        {
+          "direction": "down",
+          "targetLocationId": "vault_of_the_codex",
+          "blocked": true,
+          "blockedBy": "The Warden guards the spiral staircase — must pass its test",
+          "requiredFlag": "warden_passed"
+        }
+      ],
+      "itemIds": [],
+      "npcIds": ["the_warden"]
+    },
+    {
+      "id": "vault_of_the_codex",
+      "name": "The Vault of the Codex",
+      "description": "Circular obsidian chamber. Stone pedestal holds Codex Umbra — black leather book absorbing light. Five-disc combination lock with star-map symbols. Taking Codex triggers flooding. Pedestal engraving matches Antechamber seal. Exit: up to Restricted Section.",
+      "keywords": ["vault", "codex", "pedestal", "seal", "final"],
+      "atmosphere": "Finality, awe",
+      "exits": [
+        {
+          "direction": "up",
+          "targetLocationId": "restricted_section"
+        }
+      ],
+      "itemIds": [],
+      "npcIds": []
+    }
+  ],
+  "items": [
+    {
+      "id": "oil_lamp",
+      "name": "Oil Lamp",
+      "description": "Player's starting item. Illuminates locations. Reveals hidden text on manuscripts and star map when held close. Finite oil — refuelable from Flooded Passage jar. Dims in Act III if not refueled.",
+      "keywords": ["lamp", "oil lamp", "light"],
+      "foundLocationId": "antechamber",
+      "isStartingItem": true,
+      "consumable": false,
+      "interactions": [
+        {
+          "target": "west_wing",
+          "effect": "Holding lamp close to display case reveals hidden UV-reactive text on the Archivist's Journal"
+        },
+        {
+          "target": "reading_room",
+          "effect": "Holding lamp overhead makes star map symbols glow, revealing the 5-symbol pedestal combination",
+          "setsFlag": "star_map_read"
+        }
+      ]
+    },
+    {
+      "id": "brass_key",
+      "name": "Brass Key",
+      "description": "Found under collapsed desk in East Wing. Opens iron gate to Restricted Section. Single use — breaks in lock. Archive seal on bow. Tagged 'Restricted — Return to Desk.'",
+      "keywords": ["brass key", "key", "metallic glint"],
+      "foundLocationId": "east_wing",
+      "isStartingItem": false,
+      "consumable": true,
+      "interactions": [
+        {
+          "target": "circulation_desk",
+          "effect": "Unlocks the iron gate to the Restricted Section with a groan of old metal. The key breaks off in the lock.",
+          "setsFlag": "gate_opened",
+          "consumesItem": true
+        },
+        {
+          "target": "the_cataloger",
+          "effect": "The Cataloger recognizes the key and remarks it should have been destroyed after the Incident.",
+          "setsFlag": "cataloger_key_comment"
+        }
+      ]
+    },
+    {
+      "id": "archivists_journal",
+      "name": "Archivist's Journal",
+      "description": "Found in West Wing display case (break wax seal). Contains coded and plain-text entries about Codex Umbra. Plain text: 'It contains an appetite.' Coded pages reveal pedestal combination with Cipher Wheel.",
+      "keywords": ["journal", "archivist", "display case"],
+      "foundLocationId": "west_wing",
+      "isStartingItem": false,
+      "consumable": false,
+      "interactions": [
+        {
+          "target": "maren",
+          "effect": "Maren recognizes the journal and trusts the player. Reveals Cipher Wheel location and Warden weakness.",
+          "setsFlag": "maren_trusts"
+        },
+        {
+          "target": "cipher_wheel",
+          "effect": "Decodes the journal's coded entries, revealing the 5-symbol pedestal combination.",
+          "setsFlag": "combination_known"
+        },
+        {
+          "target": "the_cataloger",
+          "effect": "The Cataloger catalogs it: 'Archivist's Journal, personal. Classification: restricted. Overdue.'"
+        }
+      ]
+    },
+    {
+      "id": "glass_vial_solvent",
+      "name": "Glass Vial of Solvent",
+      "description": "Found in West Wing cabinet drawer. Dissolves adhesives. Can silently open display case wax seal (avoids alerting Archive). Can free one chained book in Restricted Section. Half-full, limited uses.",
+      "keywords": ["vial", "solvent", "glass vial", "drawer"],
+      "foundLocationId": "west_wing",
+      "isStartingItem": false,
+      "consumable": false,
+      "interactions": [
+        {
+          "target": "west_wing",
+          "effect": "Dissolves the wax seal cleanly, opening the display case without triggering a floor vibration. The Archive doesn't notice."
+        },
+        {
+          "target": "restricted_section",
+          "effect": "Dissolves chain adhesive on one book, freeing it. The book contains a detailed map of the Vault's pedestal mechanism."
+        }
+      ]
+    },
+    {
+      "id": "waterproof_satchel",
+      "name": "Waterproof Satchel",
+      "description": "Found on peg in Flooded Passage (easily missed). Waxed leather, keeps contents dry. Critical for Act III: protects Codex Umbra from acidic water during escape. Without it, Codex dissolves.",
+      "keywords": ["satchel", "waterproof", "bag", "peg"],
+      "foundLocationId": "flooded_passage",
+      "isStartingItem": false,
+      "consumable": false,
+      "interactions": [
+        {
+          "target": "passive",
+          "effect": "All paper items in inventory are protected from water damage. Determines whether Codex survives the escape.",
+          "setsFlag": "has_satchel"
+        }
+      ]
+    },
+    {
+      "id": "cipher_wheel",
+      "name": "Cipher Wheel",
+      "description": "Brass decoder disc in hollowed book in Reading Room. Decodes Archive script. Use on: Restricted Section inscriptions, Archivist's Journal coded pages, Circulation Desk ledger.",
+      "keywords": ["cipher wheel", "cipher", "wheel", "decoder"],
+      "foundLocationId": "reading_room",
+      "isStartingItem": false,
+      "consumable": false,
+      "interactions": [
+        {
+          "target": "restricted_section",
+          "effect": "Decodes wall inscriptions: 'The Codex opens for the one who carries its seal and speaks no claim of ownership.'"
+        },
+        {
+          "target": "archivists_journal",
+          "effect": "Decodes the journal's coded entries, revealing the 5-symbol pedestal combination.",
+          "setsFlag": "combination_known"
+        },
+        {
+          "target": "circulation_desk",
+          "effect": "Decodes ledger entries. Last name: 'Maren. 7th descent. Access denied.' Reveals Maren has been here before."
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "maren",
+      "name": "Maren",
+      "description": "Paranoid scholar survivor, trapped ~3 weeks. In Reading Room. Clipped speech, dry humor. Won't share info freely — trade Archivist's Journal for trust. Knows Cipher Wheel location and Warden weakness.",
+      "keywords": ["maren", "woman", "survivor", "figure"],
+      "locationId": "reading_room",
+      "personality": "Paranoid, sharp, exhausted. Clipped guarded sentences. Dry humor surfaces when guard drops.",
+      "dialogueHooks": {
+        "first_meeting": "Don't. Come. Closer. ...Fine. You don't look like one of them. You look lost, which is marginally better.",
+        "on_archive": "It's not a library. Libraries let you leave. This is a stomach.",
+        "on_codex": "Everyone comes here for the Codex. Everyone. That should tell you something about the Codex.",
+        "on_cipher_direct": "I know where it is. I also know what happens when you use it. You want both pieces of information, you bring me something worth trading.",
+        "after_journal": "The cipher tool is in a book that isn't a book, near the fire that wasn't a fire. The Reading Room. You're welcome.",
+        "on_warden": "Don't try to fight it. Don't try to trick it. It asks a question. Get it wrong, you don't die — you just wish you did for about an hour."
+      },
+      "questFlags": ["maren_met", "maren_trusts", "maren_cipher_hint", "maren_warden_hint"]
+    },
+    {
+      "id": "the_cataloger",
+      "name": "The Cataloger",
+      "description": "Spectral echo of former librarian, summoned by ringing brass bell at Circulation Desk. Prim, meticulous, detached. Answers reference inquiries in formal style. Fades after ~3 exchanges per summon.",
+      "keywords": ["cataloger", "spectral", "bell", "ghost", "voice"],
+      "locationId": "circulation_desk",
+      "personality": "Prim, meticulous, utterly detached from time. Speaks as if conducting a reference interview. Cares only about proper cataloging.",
+      "dialogueHooks": {
+        "summoned": "Reference desk. State your inquiry. ...You rang. That implies a question. I have a finite attention span. Posthumously finite, which is worse.",
+        "on_restricted": "Access requires a Restricted key and a valid scholarly purpose. Death does not constitute a valid scholarly purpose, despite what the last three visitors argued.",
+        "on_codex": "Classification: Unclassifiable. Status: Recalled to Vault. Checked out: never. Checked in: always. It doesn't leave. It's returned.",
+        "on_key": "That key was reported destroyed in the Incident. Interesting. Bureaucratic records are, apparently, unreliable even in death.",
+        "on_escape": "The Circulation Desk handles checkouts, returns, and reference inquiries. Escape routes are not within our catalog. Try the Antechamber."
+      },
+      "questFlags": ["cataloger_summoned", "cataloger_key_comment", "cataloger_codex_info"]
+    },
+    {
+      "id": "the_warden",
+      "name": "The Warden",
+      "description": "Disembodied voice in Restricted Section near spiral staircase. Archive security construct. Tests understanding: asks who owns what player seeks. Correct: disclaim ownership or silence. Wrong pushes player back.",
+      "keywords": ["warden", "darkness", "voice", "staircase", "guardian"],
+      "locationId": "restricted_section",
+      "personality": "Ancient, measured, neither hostile nor helpful. Speaks from walls, floor, and ceiling simultaneously. Tests understanding, not strength.",
+      "dialogueHooks": {
+        "manifesting": "You carry the key's memory. The gate's rust is still on your fingers. Why are you here?",
+        "ownership_claim": "Everyone takes. No one carries. I will ask once: who owns what you are about to hold?",
+        "wrong_answer": "Ownership is the wrong word. Try again.",
+        "correct_answer": "Acceptable. The stair is open. What the Codex shows you is your burden, not your prize.",
+        "silence": "Silence is not an answer. But it is not a claim, either."
+      },
+      "questFlags": ["warden_encountered", "warden_passed", "warden_failed_once"]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "locked_gate",
+      "name": "The Locked Gate",
+      "act": 1,
+      "description": "The iron gate at the Circulation Desk blocks access to the Restricted Section. The player must open it.",
+      "locationId": "circulation_desk",
+      "turnBudget": "3-6",
+      "solutions": [
+        {
+          "name": "Brass Key",
+          "requiredItems": ["brass_key"],
+          "steps": [
+            "Explore East Wing, notice metallic glint under collapsed desk",
+            "Investigate glint — pick up Brass Key",
+            "Use key on iron gate at Circulation Desk — gate opens, key breaks"
+          ],
+          "setsFlags": ["brass_key_found", "gate_opened"]
+        },
+        {
+          "name": "Cataloger Bypass",
+          "requiredItems": ["archivists_journal"],
+          "requiredFlags": ["cataloger_summoned"],
+          "steps": [
+            "Ring brass bell at Circulation Desk to summon Cataloger",
+            "Ask Cataloger about accessing the Restricted Section",
+            "Show Archivist's Journal as authorization — Cataloger opens gate"
+          ],
+          "setsFlags": ["gate_opened"]
+        }
+      ],
+      "completionFlags": ["gate_opened", "act_two_entered"]
+    },
+    {
+      "id": "cipher_discovery",
+      "name": "The Cipher Discovery",
+      "act": 1,
+      "description": "The Codex Umbra is locked in a pedestal with a 5-symbol combination lock. The player must find the decoding tool and the combination.",
+      "locationId": "reading_room",
+      "turnBudget": "4-7",
+      "solutions": [
+        {
+          "name": "Maren's Trade",
+          "requiredItems": ["archivists_journal"],
+          "steps": [
+            "Encounter Maren in the Reading Room",
+            "Find Archivist's Journal in West Wing",
+            "Give journal to Maren — she trusts the player",
+            "Maren reveals Cipher Wheel location — search near fire pit",
+            "Find Cipher Wheel in hollowed-out book"
+          ],
+          "setsFlags": ["maren_trusts", "maren_cipher_hint", "cipher_wheel_found"]
+        },
+        {
+          "name": "Independent Discovery",
+          "steps": [
+            "Explore Reading Room thoroughly",
+            "Examine fire pit area — find hollowed books",
+            "Find Cipher Wheel",
+            "Use Cipher Wheel on Archivist's Journal — reveals combination"
+          ],
+          "setsFlags": ["cipher_wheel_found", "combination_known"]
+        },
+        {
+          "name": "Star Map",
+          "requiredItems": ["oil_lamp"],
+          "steps": [
+            "Examine star map dome in Reading Room",
+            "Hold lamp overhead — symbols glow",
+            "Memorize the 5-symbol sequence"
+          ],
+          "setsFlags": ["star_map_read", "combination_known"]
+        }
+      ],
+      "completionFlags": ["combination_known"]
+    },
+    {
+      "id": "wardens_question",
+      "name": "The Warden's Question",
+      "act": 2,
+      "description": "The spiral staircase to the Vault is guarded by the Warden. The player must pass its test: disclaim ownership of the Codex or remain silent.",
+      "locationId": "restricted_section",
+      "turnBudget": "2-4",
+      "solutions": [
+        {
+          "name": "Informed Answer",
+          "requiredFlags": ["combination_known"],
+          "steps": [
+            "Approach spiral staircase — Warden manifests",
+            "Disclaim ownership: 'No one owns it' or similar"
+          ],
+          "setsFlags": ["warden_encountered", "warden_passed"]
+        },
+        {
+          "name": "Silence",
+          "steps": [
+            "Approach spiral staircase — Warden manifests",
+            "Remain silent — Warden accepts non-claim"
+          ],
+          "setsFlags": ["warden_encountered", "warden_passed"]
+        }
+      ],
+      "completionFlags": ["warden_passed"]
+    },
+    {
+      "id": "codex_and_flood",
+      "name": "The Codex and the Flood",
+      "act": 3,
+      "description": "Unlock the Codex pedestal, take the Codex, and escape the flooding Archive back to the Antechamber.",
+      "locationId": "vault_of_the_codex",
+      "turnBudget": "5-8",
+      "solutions": [
+        {
+          "name": "Standard Escape",
+          "requiredFlags": ["combination_known", "warden_passed"],
+          "steps": [
+            "Enter Vault, input combination on pedestal lock",
+            "Take Codex Umbra — triggers flooding",
+            "Navigate: Vault → Restricted Section → Circulation Desk → Main Hall → Antechamber",
+            "Hold Codex to sealed door — seal glows, rubble shifts, exit opens"
+          ],
+          "setsFlags": ["codex_taken", "flood_triggered", "escaped"]
+        }
+      ],
+      "completionFlags": ["escaped"]
+    }
+  ],
+  "questFlags": {
+    "brass_key_found": false,
+    "gate_opened": false,
+    "act_two_entered": false,
+    "journal_found": false,
+    "solvent_found": false,
+    "satchel_found": false,
+    "cipher_wheel_found": false,
+    "combination_known": false,
+    "star_map_read": false,
+    "maren_met": false,
+    "maren_trusts": false,
+    "maren_cipher_hint": false,
+    "maren_warden_hint": false,
+    "cataloger_summoned": false,
+    "cataloger_key_comment": false,
+    "cataloger_codex_info": false,
+    "warden_encountered": false,
+    "warden_passed": false,
+    "warden_failed_once": false,
+    "warden_failed_twice": false,
+    "codex_taken": false,
+    "flood_triggered": false,
+    "has_satchel": false,
+    "codex_intact": false,
+    "escaped": false,
+    "ending": null
+  }
+}

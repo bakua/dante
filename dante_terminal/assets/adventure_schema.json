@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dante-terminal-adventure-schema-v1",
+  "title": "DANTE TERMINAL Adventure Data Schema",
+  "description": "Defines the structure for adventure scenario data consumed by AdventureLoader. Location descriptions are constrained to ≤60 tokens (~240 chars) per L-012 token budget requirements. Designed for on-device LLM prompt injection via keyword-triggered lore entries.",
+  "type": "object",
+  "required": ["id", "title", "theme", "openingNarrative", "startLocationId", "startInventory", "locations", "items", "npcs", "puzzles", "questFlags"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique adventure identifier (snake_case)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable adventure title"
+    },
+    "theme": {
+      "type": "string",
+      "description": "Adventure genre/theme tag"
+    },
+    "openingNarrative": {
+      "type": "string",
+      "description": "Cold-open text shown on adventure start (≤90 words per BL-013)"
+    },
+    "startLocationId": {
+      "type": "string",
+      "description": "ID of the location where the player begins"
+    },
+    "startInventory": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Item IDs the player starts with"
+    },
+    "locations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/location" },
+      "description": "All explorable locations in the adventure"
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/item" },
+      "description": "All collectible/interactive items"
+    },
+    "npcs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/npc" },
+      "description": "All non-player characters"
+    },
+    "puzzles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/puzzle" },
+      "description": "Sequential puzzle chain gating progress"
+    },
+    "questFlags": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "boolean" },
+          { "type": "string" },
+          { "type": "null" }
+        ]
+      },
+      "description": "Initial quest flag state (all flags with default values)"
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": "object",
+      "required": ["id", "name", "description", "keywords", "exits"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique location identifier (snake_case)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the location"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 280,
+          "description": "Lore entry for GM prompt injection. MUST be ≤60 tokens (~240 chars). Contains key sensory details, notable objects, and exit info."
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Trigger words that activate this location's lore entry in prompt assembly"
+        },
+        "atmosphere": {
+          "type": "string",
+          "description": "Short mood/tone descriptor for GM voice calibration"
+        },
+        "exits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exit" },
+          "description": "Available movement directions from this location"
+        },
+        "itemIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of items discoverable in this location"
+        },
+        "npcIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of NPCs present in this location"
+        }
+      }
+    },
+    "exit": {
+      "type": "object",
+      "required": ["direction", "targetLocationId"],
+      "properties": {
+        "direction": {
+          "type": "string",
+          "description": "Compass direction or spatial label (north, south, east, west, up, down)"
+        },
+        "targetLocationId": {
+          "type": "string",
+          "description": "ID of the destination location"
+        },
+        "blocked": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this exit is initially impassable"
+        },
+        "blockedBy": {
+          "type": "string",
+          "description": "Description of what blocks this exit (for GM narration)"
+        },
+        "requiredFlag": {
+          "type": "string",
+          "description": "Quest flag that must be true to use this exit"
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "name", "description", "keywords", "foundLocationId"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique item identifier (snake_case)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the item"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Lore entry for prompt injection (≤50 tokens)"
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Trigger words that activate this item's lore entry"
+        },
+        "foundLocationId": {
+          "type": "string",
+          "description": "Location ID where this item is first discoverable"
+        },
+        "isStartingItem": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the player begins with this item"
+        },
+        "consumable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the item is destroyed on use"
+        },
+        "interactions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/interaction" },
+          "description": "Context-specific use behaviors"
+        }
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "required": ["target", "effect"],
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "What the item is used on (location ID, item ID, NPC ID, or 'passive')"
+        },
+        "effect": {
+          "type": "string",
+          "description": "Narrative description of what happens"
+        },
+        "setsFlag": {
+          "type": "string",
+          "description": "Quest flag set to true when this interaction occurs"
+        },
+        "consumesItem": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this interaction destroys the item"
+        }
+      }
+    },
+    "npc": {
+      "type": "object",
+      "required": ["id", "name", "description", "keywords", "locationId", "personality"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique NPC identifier (snake_case)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the NPC"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 260,
+          "description": "Lore entry for prompt injection (≤55 tokens)"
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Trigger words that activate this NPC's lore entry"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Location ID where this NPC is found"
+        },
+        "personality": {
+          "type": "string",
+          "description": "Brief personality sketch for GM voice calibration"
+        },
+        "dialogueHooks": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Named dialogue triggers mapping context keys to sample dialogue"
+        },
+        "questFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Quest flags this NPC can set through interaction"
+        }
+      }
+    },
+    "puzzle": {
+      "type": "object",
+      "required": ["id", "name", "act", "description", "solutions"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique puzzle identifier (snake_case)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the puzzle"
+        },
+        "act": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Which act this puzzle belongs to (1=Orientation, 2=Escalation, 3=Resolution)"
+        },
+        "description": {
+          "type": "string",
+          "description": "What the puzzle requires the player to accomplish"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Primary location where this puzzle is encountered"
+        },
+        "solutions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/solution" },
+          "description": "Multiple solution paths (wide paths, narrow gates per BL-013)"
+        },
+        "completionFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Quest flags set when the puzzle is solved"
+        },
+        "turnBudget": {
+          "type": "string",
+          "description": "Expected turn range to solve (e.g., '3-6')"
+        }
+      }
+    },
+    "solution": {
+      "type": "object",
+      "required": ["name", "steps"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Solution path name (e.g., 'Primary', 'Alternative')"
+        },
+        "requiredItems": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Item IDs needed for this solution"
+        },
+        "requiredFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Quest flags that must be set for this solution"
+        },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered steps the player takes"
+        },
+        "setsFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Quest flags set by completing this solution path"
+        }
+      }
+    }
+  }
+}
