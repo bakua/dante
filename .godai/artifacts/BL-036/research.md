@@ -1,299 +1,296 @@
-# Small Language Model Prompting Techniques for Maximizing Interactive Fiction Quality (1-3B Parameters)
+# Small Language Model Prompting Techniques for Interactive Fiction (1-3B Parameters)
 
-> **BL-036** | Created: 2026-03-25 | Audience: founding team & prompt engineering work (BL-005, BL-018)
+> **BL-036** | Created: 2026-03-25 | Audience: founding team, prompt engineering for BL-005/BL-018
 >
-> Purpose: Provide evidence-based prompting guidelines so BL-005 (Game Master prompt implementation) and BL-018 (genre template testing) build on proven small-model techniques rather than trial-and-error. This research fills the gap between BL-010's product-level prompt patterns (designed for large cloud models) and BL-012's empirical findings (which showed those patterns failing on small models).
+> Purpose: Provide evidence-based prompting guidelines so BL-005 (Game Master prompt) and BL-018 (genre template testing) build on proven small-model techniques rather than large-model intuitions applied blindly to constrained environments. This research fills the gap between BL-010's product-level prompt patterns (designed for GPT-4/Claude-class models) and the empirical realities of 1-3B parameter on-device inference.
 
 ---
 
 ## Summary
 
-Small language models (1-3B parameters) behave fundamentally differently from the large cloud-hosted models (GPT-4, Claude) that power existing AI interactive fiction products. Published benchmarks and our own BL-012 findings confirm three critical gaps: (1) instruction-following fidelity drops dramatically below 3B parameters — Llama 3.2 1B achieves only 25.7% on BFCL V2 structured output vs. 67.0% for the 3B variant; (2) multi-turn conversation degrades performance by an average of 39% even on large models, and small models are even more sensitive; (3) zero-shot structured output (JSON/suggestions) is essentially non-functional on sub-3B models (7.34% parsability on the best-performing 1.3B model). However, three techniques reliably compensate: few-shot examples (boosting JSON parsability from 7% to 89%), GBNF grammar-constrained decoding (guaranteeing 100% structural compliance at any model size), and instruction anchoring near the generation point (the "Author's Note" pattern). This document provides a concrete prompting playbook for DANTE TERMINAL's 1-3B parameter interactive fiction generation.
+Small language models (1-3B parameters) behave fundamentally differently from large models in ways that directly impact interactive fiction generation: instruction following drops from ~84% (72B) to ~58-77% (3B) to ~28% (0.5B) on IFEval; persona consistency degrades measurably within 8 dialogue turns; and structured output compliance is near-zero without constrained decoding. However, targeted techniques -- few-shot examples (1-2 max), GBNF grammar-constrained generation, repeat-instruction anchoring near the generation point, and aggressive context budgeting under 1,500 tokens -- can compensate for these limitations. The key insight is that small models learn by *seeing patterns* (few-shot), not by *parsing instructions* (zero-shot), and that format compliance must be *enforced mechanically* (grammar) rather than *requested linguistically* (system prompt).
 
 ---
 
 ## 1. Small Model Behavior Profile: Large vs. Small Model Differences
 
-This section documents the empirically verified behavioral differences between large models (7B+/cloud) and small models (1-3B) across four dimensions critical to interactive fiction.
+### 1.1 Instruction Following Fidelity
 
-### 1.1 Instruction-Following Fidelity
+The gap between large and small models in instruction following is steep and well-documented:
 
-**The core problem:** Small models do not reliably follow natural-language instructions, especially when those instructions describe output formatting, response length, or multi-part constraints.
+**IFEval Benchmark (Strict-Prompt) -- Instruction Following Evaluation:**
 
-**Benchmark evidence:**
+| Model | Parameters | IFEval Score | Source |
+|-------|-----------|-------------|--------|
+| Qwen2.5-72B-Instruct | 72B | 84.1 | Qwen technical report [1] |
+| Qwen2.5-14B-Instruct | 14B | 81.0 | Qwen technical report [1] |
+| Llama 3.2 3B Instruct | 3B | **77.4** | Meta eval / HuggingFace blog [2] |
+| Gemma 2B IT | 2B | **61.9** | Llama 3.2 benchmark comparison [2] |
+| Phi-3.5-mini-Instruct | 3.8B | **59.2** | Llama 3.2 benchmark comparison [2] |
+| Qwen2.5-3B-Instruct | 3B | **58.2** | Qwen technical report [1] |
+| Qwen2.5-1.5B-Instruct | 1.5B | 42.5 | Qwen technical report [1] |
+| Qwen2.5-0.5B-Instruct | 0.5B | 27.9 | Qwen technical report [1] |
 
-| Benchmark | Llama 3.2 1B | Llama 3.2 3B | Phi-3.5-mini (3.8B) | Llama 3.1 8B | What It Measures |
-|-----------|-------------|-------------|---------------------|-------------|------------------|
-| **IFEval** (Instruction Following) | ~49* | **77.4** | 59.2 | 80.4 | Strict instruction adherence (format, length, constraints) |
-| **MMLU** (5-shot) | ~36* | **63.4** | **69.0** | 73.0 | General knowledge/reasoning |
-| **ARC-Challenge** (5-shot) | ~55* | **78.6** | **87.4** | 83.4 | Commonsense reasoning |
-| **BFCL V2** (Tool Use/Structured Output) | **25.7** | **67.0** | — | — | JSON function call generation |
+**Key observations for DANTE TERMINAL:**
+- **Llama 3.2 3B is the outlier**: 77.4 IFEval is remarkably high for 3B -- matching Llama 3.1 8B performance. This is the single strongest instruction-following model at the <=3B scale.
+- **Qwen 2.5 3B lags in IFEval** (58.2) despite being better at math/coding. For interactive fiction where instruction format compliance matters, Llama 3.2 3B is the stronger base.
+- **The 1B to 3B jump is dramatic**: Qwen drops from 42.5 (1.5B) to 58.2 (3B) -- a 37% improvement. BL-012's finding that "1B models are NOT viable" is confirmed by benchmarks.
+- **Nuanced instructions degrade further**: Research shows performance can drop by up to 61.8% on nuanced prompt variations (IFEval++), with small models suffering >80% drops on composed instructions [4].
 
-*Sources: Meta Llama 3.2 model cards (HuggingFace), Medium/Towards AGI benchmark analysis, Phi-3 Technical Report (arXiv:2404.14219). Scores marked * are interpolated from available data.*
-
-**Key findings:**
-
-1. **The 3B threshold is real.** Research on small models for function calling (arXiv:2504.19277) establishes "a clear capability boundary around the 3B-parameter threshold." Models below 2B struggle fundamentally with structured output — only Deepseek-Coder-1.3B achieved *any* non-zero JSON parsability in zero-shot (7.34%), while all other sub-4B models scored 0%.
-
-2. **IFEval shows the gap most clearly.** Llama 3.2 3B scores 77.4 on IFEval — impressive, but this measures single-turn instruction following. In multi-turn interactive fiction scenarios (where instructions compete with narrative context), effective adherence drops substantially.
-
-3. **Instruction finetuning has limits.** The JMLR scaling study (Chung et al., 2024) found that instruction finetuning *without* chain-of-thought data can actually degrade reasoning ability. Full-parameter instruction fine-tuning risks "overwriting pre-trained knowledge during the fine-tuning process," leading to increased hallucination.
-
-**DANTE TERMINAL implication:** The 3B floor confirmed by BL-012 is also confirmed by the literature. 1B models are not viable for instruction-following tasks. Even at 3B, natural-language format instructions ("end with exactly 3 suggestions") will fail — mechanical enforcement (grammar constraints, few-shot examples) is required.
+**What this means for interactive fiction:** A 3B model can follow simple, direct instructions ("respond in 2-3 sentences, end with 3 suggestions") roughly 58-77% of the time -- but compound instructions ("respond in 2-3 sentences AND use sensory detail AND maintain sardonic tone AND end with exactly 3 suggestions AND advance the plot") will see compliance plummet. **Design for one critical instruction at a time; enforce the rest mechanically.**
 
 ### 1.2 Structured Output Compliance
 
-**The core problem:** Small models cannot reliably produce structured output (JSON, numbered lists, specific formats) from instruction alone.
+Small models are dramatically worse at producing structured output through prompting alone:
 
-**Empirical evidence:**
+**Schema Accuracy (Llama 3.2-1B, unconstrained prompting):**
 
-| Model | Params | Zero-Shot JSON Parsability | 3-Shot JSON Parsability | Fine-Tuned Parsability |
-|-------|--------|--------------------------|------------------------|----------------------|
-| Deepseek-Coder-1.3B | 1.3B | 7.34% | **89.38%** | **99.44%** |
-| Phi-3-mini | 3.8B | 0% | 0% | **99.62%** |
-| Phi-2 | 2.78B | 0% | 0% | — |
-| StarCoder2-3B | 2.8B | 0% | 0% | — |
+| Dataset Complexity | Compliance Rate (LM-only) | With Constrained Decoding |
+|-------------------|--------------------------|--------------------------|
+| Simple (GlaiveAI) | 90% | 95-96% |
+| Moderate (GitHub Easy) | 65% | 75-86% |
+| Complex (GitHub Medium) | 38% | ~60% |
+| High (Snowplow) | 46% | ~65% |
 
-*Source: "Small Models, Big Tasks" (arXiv:2504.19277)*
+Source: "Generating Structured Outputs from Language Models: Benchmark and Studies" [3]
 
-**Critical observations:**
+**Critical finding:** On complex structured output tasks, a 1B model achieves only 38% compliance through prompting alone -- meaning ~62% of responses will have broken format. Constrained decoding frameworks (including llama.cpp's GBNF grammar) improve this to 60-86% depending on complexity.
 
-1. **Zero-shot structured output is essentially broken at <4B.** Most small models cannot produce valid JSON even when explicitly instructed. BL-012 confirmed this: neither TinyLlama 1.1B nor Phi-3-mini produced the `> 1. / 2. / 3.` suggestion format despite clear system prompt instruction.
+**BL-012 confirmation:** Both TinyLlama (1.1B) and Phi-3-mini (3.8B) achieved 0% compliance on the suggestion format (`> 1. [action]`) despite explicit system prompt instructions. This is consistent with the benchmark data -- structured output through prompting alone is unreliable at this scale.
 
-2. **Few-shot examples provide massive uplift — but not universally.** Deepseek-Coder jumped from 7% to 89% with just 3 examples. However, Phi-3-mini remained at 0% even with few-shot, suggesting the technique is model-dependent. The general finding: few-shot works best on models already partially capable of the format.
-
-3. **Constrained decoding is the only universal guarantee.** Grammar-constrained decoding via GBNF ensures 100% structural compliance regardless of model capability, because invalid tokens are masked at generation time (see Section 2.4).
-
-4. **Format choice matters.** Research on structured output robustness (arXiv:2507.01810) found that YAML and XML formats show higher parseability than JSON for small models, likely because they require fewer precise punctuation tokens. For DANTE TERMINAL's suggestion format (simple numbered list), the structure is simple enough that GBNF enforcement is straightforward.
-
-**DANTE TERMINAL implication:** Do not rely on instructions alone for the suggestion format. Use GBNF grammar as primary enforcement, with 1 few-shot example as secondary reinforcement.
+**Supervised fine-tuning as alternative:** A fine-tuned 1B model achieves 88.9% schema accuracy and 81.7% content similarity [3] -- dramatically better than prompting. This suggests LoRA fine-tuning for structured output format is a viable future path if GBNF grammar proves insufficient.
 
 ### 1.3 Persona Maintenance Over Turns
 
-**The core problem:** Small models struggle to maintain a consistent persona, tone, and character across multi-turn conversations. Instructions from the system prompt "fade" as conversation context grows.
+Persona drift -- the gradual loss of character consistency during multi-turn conversation -- is a documented phenomenon that worsens with smaller models:
 
-**Research evidence:**
+**Quantitative findings:**
+- LLaMA2-chat-70B shows "significant persona drift within 8 rounds of dialogue" [5]
+- After 8-12 dialogue turns, persona self-consistency metrics degrade by **more than 30%**, even with context intact [6]
+- The transformer attention mechanism causes "attention decay over long exchanges" -- the model's behavior is influenced most strongly by the **most recent user message** rather than the system prompt [9]
+- Persona fidelity degrades especially in goal-oriented conversations where the model must sustain both persona AND instruction following simultaneously
 
-1. **"Lost in Conversation" (arXiv:2505.06120):** Models show an average -39% performance degradation in multi-turn vs. single-turn settings, with a 112% increase in output variance. Even strong models (Claude 3.7, GPT-4.1) experience 30-40% degradation. Smaller models show "more sensitivity to instruction rephrasing" but similar multi-turn unreliability patterns.
+**The "Lost in the Middle" effect amplifies this:**
+- Information placed in the middle of context receives the least attention -- a U-shaped performance curve with primacy bias (beginning) and recency bias (end) [7]
+- For a 1,500-token context, the "dead zone" is roughly tokens 400-1,100 -- exactly where narrative history sits in our proposed prompt architecture
+- GPT-3.5's performance drops >20% for information placed in the middle of 20+ document contexts [7]
 
-2. **"Lost in the Middle" (Liu et al., TACL 2024):** Performance is highest when relevant information occurs at the beginning or end of context, and "significantly degrades when models must access relevant information in the middle of long contexts." For a system prompt at the top of a growing conversation, its effective influence decreases as more turns are added.
+**What this means for interactive fiction:** The GM's sardonic tone, world-building style, and narrative voice will drift toward generic assistant behavior within 6-10 turns unless actively reinforced. Smaller models will drift faster because:
+1. Weaker attention to distant system prompt instructions
+2. Lower instruction-following baseline means drift starts from a lower fidelity point
+3. The "lost in the middle" effect buries the persona definition under growing narrative history
 
-3. **"Context Rot" (Chroma Research, 2025):** Performance degrades consistently with increasing input length, even when the model can perfectly retrieve all relevant information. The degradation is 13.9-85% depending on the task, and occurs well within models' claimed context lengths. Models perform *better* on shuffled (incoherent) haystacks than logically coherent ones — suggesting structural patterns can paradoxically harm attention mechanisms.
+**Mitigation data:**
+- **System prompt repetition** (re-injecting persona instructions periodically) is effective but "consumes a substantial portion of the context window" [5]
+- **Split-softmax** (amplifying attention to system prompt tokens) reduces drift but is not available in llama.cpp
+- The Author's Note pattern (BL-010) -- placing style directives near the generation point -- directly exploits recency bias to counteract persona drift
 
-4. **BL-012 empirical finding:** Phi-3-mini maintained coherent persona (the "Eldoria" world) for 5 turns, then suffered catastrophic collapse at ~2,500 prompt tokens — "not a gradual degradation but a cliff." TinyLlama 1.1B lost persona by turn 3, generating both player and GM dialogue.
+### 1.4 Creative Narrative Generation Quality
 
-**Quantified degradation pattern for small models:**
+**Performance scaling for creativity:**
+- Creativity scales at approximately N^0.45 with model size -- the steepest scaling exponent among measured capabilities [17]
+- This means the quality gap between 1B and 3B for creative writing is **proportionally larger** than for factual tasks
+- Small open-source models (1-3B) score 56-60% on creative writing benchmarks where frontier models score ~70% [LitBench]
 
-| Turn Count | Prompt Tokens (est.) | Persona Coherence | Instruction Adherence |
-|------------|---------------------|-------------------|----------------------|
-| 1-3 | 300-800 | High | Moderate |
-| 4-5 | 800-1,500 | Good | Degrading |
-| 6-8 | 1,500-2,500 | Poor | Minimal |
-| 9+ | 2,500+ | Collapsed | Absent |
+**MMLU scores for reference (general knowledge, correlates with creative world-building):**
 
-*Based on BL-012 Phi-3-mini empirical results and "Lost in Conversation" research trends.*
+| Model | Parameters | MMLU (5-shot) |
+|-------|-----------|--------------|
+| Phi-4-mini | 3.8B | 67.3 |
+| Llama 3.2 3B | 3B | 63.4 |
+| Gemma 3 4B IT | 4B | 59.6 |
+| Gemma 2B IT | 2B | 57.8 |
 
-**DANTE TERMINAL implication:** The "Author's Note" pattern (placing style directives near the generation point rather than only in the system prompt) is critical. Small models need persona reinforcement at the *end* of context, not just the beginning. Additionally, aggressive context windowing (~1,500 tokens max, per BL-012) is non-negotiable.
-
-### 1.4 Creative Narrative Generation
-
-**The core problem:** Generating high-quality, atmospheric prose requires balancing creativity (high temperature, diverse vocabulary) with coherence (staying on-topic, maintaining world state). Small models are more prone to the extremes: either repetitive/generic output or hallucinated/incoherent output.
-
-**Evidence:**
-
-1. **BL-012 empirical results:** TinyLlama 1.1B produced "meta-conversation (fake Player/GM dialogue) instead of actual narrative prose" — quality score 1/5. Phi-3-mini 3.8B produced "genuinely immersive, atmospheric prose" at 4/5 quality for turns 1-5, but collapsed to unintelligible output by turn 6+. The quality gap between 1B and 3B is not linear — it's a step function.
-
-2. **Response length control failure:** Both BL-012 models produced 300-500 token responses when 80-120 tokens were needed (per BL-013 game design). Small models cannot follow length instructions reliably. Hard `max_tokens` caps and few-shot example calibration are needed.
-
-3. **Genre-specific fine-tunes outperform base instruction models.** BL-010 identified several sub-4B creative fine-tunes (CreativeWriter-Llama3.2-3B, NEO-SI-FI, NEO-WEE-HORROR) that produce "more vivid, tonally consistent prose than base instruction-tuned models at the same parameter count." This aligns with the literature: targeted fine-tuning on narrative data is the most reliable way to improve creative quality at small scale.
-
-4. **Temperature sensitivity.** Small models require more careful temperature tuning. Too low (0.3-0.5) → repetitive, formulaic output. Too high (0.9+) → hallucinated, incoherent output. The sweet spot for narrative generation is typically 0.7-0.8 with top_p 0.9-0.95 and a moderate repeat_penalty (1.05-1.15).
-
-**DANTE TERMINAL implication:** Narrative quality is achievable at 3B but requires: (a) keeping within the ~1,500 token context window, (b) using `max_tokens` + few-shot calibration for response length, (c) considering genre-specific fine-tunes or LoRA adapters for BL-013's 4 themes.
+**Specific model observations:**
+- BL-012 empirically confirmed: Phi-3-mini (3.8B) produces "genuinely immersive, atmospheric prose with vivid imagery" for turns 1-5, scoring 4/5 on narrative quality
+- Genre-specific fine-tunes (DavidAU's NEO series) produce more vivid, tonally consistent prose than base instruction-tuned models at the same parameter count (BL-010 finding)
+- Gemma 3 models are noted for strong narrative coherence and immersive world-building, though most data is for the 27B variant [Google Developers Blog]
 
 ---
 
-## 2. Prompting Technique Effectiveness at Small Scale (1-3B Parameters)
+## 2. Prompting Technique Effectiveness at Small Scale
 
-This section evaluates 8 named prompting techniques with expected effectiveness at 1-3B scale.
+### Overview Table
 
-### 2.1 Few-Shot Examples
+| # | Technique | Expected Effectiveness (1-3B) | Evidence Basis | Token Cost | Priority for DANTE |
+|---|-----------|-------------------------------|---------------|------------|-------------------|
+| 1 | Few-shot examples | **Effective** | Strong | 120-200 per example | P0 -- Critical |
+| 2 | GBNF constrained decoding | **Effective** | Strong | ~0 (CPU overhead only) | P0 -- Critical |
+| 3 | Repeat-instruction anchoring | **Effective** | Moderate | 30-50 per anchor | P0 -- Critical |
+| 4 | Role-play framing | **Effective** (with caveats) | Moderate | 20-40 tokens | P1 -- Important |
+| 5 | XML/tag-structured prompting | **Degraded** | Moderate | 10-30 tokens overhead | P1 -- Important |
+| 6 | Negative examples | **Ineffective** | Strong | Wastes tokens | P3 -- Avoid |
+| 7 | Chain-of-thought | **Degraded** | Moderate | 50-100+ tokens | P2 -- Situational |
+| 8 | JSON-structured output prompting | **Degraded** | Strong | 50-100 tokens | P2 -- Only with grammar |
 
-**Technique:** Include 1-3 complete input→output examples in the prompt to demonstrate desired format and behavior.
+### 2.1 Few-Shot Examples -- EFFECTIVE
 
-**Effectiveness at 1-3B: ✅ EFFECTIVE (with caveats)**
+**What it is:** Including 1-2 complete input->output examples in the prompt to demonstrate the expected format, length, and tone.
+
+**Why it works at small scale:** Small models have weak instruction-following (Section 1.1) but retain strong pattern-matching from pre-training. Few-shot examples bypass the instruction-parsing bottleneck by showing the pattern directly. The model learns "generate output that looks like this" rather than parsing "generate 2-3 sentences of atmospheric prose ending with exactly 3 action suggestions."
 
 **Evidence:**
-- Few-shot prompting boosted Deepseek-Coder-1.3B JSON parsability from 7.34% to 89.38% with just 3 examples (arXiv:2504.19277).
-- Research on Phi-3-mini and OLMo-2-7B shows "merely two examples" can "approach or exceed 7B-class baselines" for select mid-sized models (arXiv:2507.01810).
-- The "Few-Shot Dilemma" research (arXiv:2509.13196) warns that smaller models (3-4B) show "severe performance collapse with excessive examples" and "struggle beyond 20 examples." The optimal range for sub-4B models is 1-3 examples.
-- BL-012 found that both tested models ignored the suggestion format without examples. BL-010 recommended "1 example maximum, kept under 150 tokens" to conserve the 1,500-token budget.
+- "The first few examples improve accuracy sharply, with additional examples yielding smaller boosts and plateauing by 4-5 examples" [Brown et al., NeurIPS 2020]
+- "2 strong examples outperform 6 mediocre ones every time" -- quality over quantity [15]
+- For small models, the diminishing returns are even more pronounced: "beyond 5 examples, the model gets confused by variation rather than guided by it" [phrasly.ai]
+- BL-010 already recommended 1 example maximum (~120-150 tokens) due to the 1,500-token safe zone constraint
 
 **Optimal configuration for DANTE TERMINAL:**
-- **1 example** (not 2-3) to conserve tokens
-- Example should be ~100-120 tokens showing: atmospheric prose (2-3 sentences) + exactly 3 numbered suggestions
-- Example implicitly teaches response length, tone, and format simultaneously
-- Place example after system instructions, before conversation history
+- **1 example** (not 2) -- saves ~150 tokens while still establishing format and tone
+- Example should demonstrate: exact response length (60-90 words), suggestion format (> 1. / > 2. / > 3.), sardonic tone, sensory detail
+- The example implicitly teaches all constraints that explicit instructions would fail to enforce
+- Place example immediately after system instructions, before any dynamic content
 
-**Rating: EFFECTIVE — the single highest-impact technique for small models when combined with constrained decoding.**
+**Token cost:** ~120-150 tokens for one well-crafted example
 
-### 2.2 XML/JSON Structured Prompting
+**Rating: EFFECTIVE** -- Single most important technique for small models. Non-negotiable for BL-005.
 
-**Technique:** Use XML tags (`<narrative>`, `<suggestions>`) or JSON structure to delineate output sections, leveraging training data familiarity with markup.
+### 2.2 GBNF Constrained Decoding -- EFFECTIVE
 
-**Effectiveness at 1-3B: ⚠️ DEGRADED**
+**What it is:** Using llama.cpp's GBNF grammar system to mechanically constrain which token sequences the model can produce, enforcing structural format at the decoding level.
 
-**Evidence:**
-- LLMs are trained on massive amounts of structured/semi-structured data including XML and HTML, making them "particularly adept at recognizing and processing information wrapped in tags" (CodeConductor, 2025).
-- However, at <4B parameters, XML tag compliance is inconsistent. Models may open tags but fail to close them, mix narrative text into structured sections, or ignore tag boundaries entirely.
-- The structured output benchmark (arXiv:2501.10868) found that "LM-only approaches achieve acceptable coverage on easy-to-medium datasets but show significant performance drops on harder datasets" — and harder datasets include those requiring multi-section structured output.
-- For *input* structuring (organizing the prompt), XML tags are universally helpful. For *output* structuring (expecting the model to produce XML), small models are unreliable without constrained decoding.
-
-**Optimal configuration for DANTE TERMINAL:**
-- **Use XML tags for INPUT structuring:** `[WORLD STATE]`, `[EXAMPLE]`, `[STYLE]`, `[HISTORY]` — these help the model parse the prompt even if it can't produce structured output.
-- **Do NOT rely on XML tags for OUTPUT structuring.** Instead, use GBNF grammar to enforce the narrative + suggestions format.
-- Keep tag names simple and short — `[STATE]` not `<game_world_state_information>`.
-
-**Rating: DEGRADED for output; EFFECTIVE for input structuring.**
-
-### 2.3 Role-Play Framing
-
-**Technique:** Assign the model a specific persona ("You are a sardonic Game Master") to steer tone and behavior.
-
-**Effectiveness at 1-3B: ⚠️ DEGRADED (but still worth doing)**
+**Why it works at small scale:** Bypasses instruction following entirely -- the model doesn't need to "understand" the format instruction because the grammar prevents invalid token sequences. "Smaller models are more liable to produce non-valid output, meaning [grammar-constrained decoding] is especially valuable for researchers working in memory-constrained environments" [11].
 
 **Evidence:**
-- PromptHub research (2024) found persona prompting is "effective for open-ended tasks (e.g., creative writing), but it's generally not beneficial for accuracy-based tasks." Since interactive fiction is primarily creative, role-play framing should help.
-- BL-012 confirmed: Phi-3-mini 3.8B successfully adopted the GM persona and maintained it for 5 turns. TinyLlama 1.1B failed entirely — it "role-played both sides," generating both player and GM dialogue.
-- Qwen 2.5 3B is specifically noted for being "more resilient to diversity of system prompts, enhancing role-play implementation" — making it a strong candidate for multi-theme role-play (BL-013's 4 genre themes).
-- Role-play framing is more reliable when combined with a few-shot example that demonstrates the persona in action, rather than relying on instruction alone.
+- Constrained decoding achieves 95-96% compliance where unconstrained prompting achieves 90% on simple tasks, and the gap widens dramatically on complex tasks (86% vs 65%) [3]
+- "GBNF is a guardrail that solves the 'will this even assemble?' problem completely, eliminating an entire class of errors upfront" [12]
+- llama.cpp token mask computation averages 50us per token with p99 at 0.5ms -- negligible overhead [10]
+- The SINE interactive fiction research project achieved 68-86% success rates using grammar-guided decoding for generating IF content in the Ink scripting language [MDPI Applied Sciences 2025]
+- BL-010 already confirmed this as the primary recommendation for suggestion format enforcement
 
-**Optimal configuration for DANTE TERMINAL:**
-- Keep the persona instruction short: "You are the Game Master of DANTE TERMINAL — sardonic, atmospheric, fair."
-- **Reinforce persona near the generation point** via Author's Note pattern, not just in the system prompt header.
-- Combine with 1 few-shot example that demonstrates the persona tone.
-- Budget: ~20-30 tokens for role-play framing.
-
-**Rating: DEGRADED — works at 3B+ for creative tasks, fails at 1B. Must be reinforced via proximity to generation point.**
-
-### 2.4 Constrained Decoding (GBNF Grammar)
-
-**Technique:** Use GBNF grammars in llama.cpp to mask invalid tokens at generation time, guaranteeing structural compliance in output.
-
-**Effectiveness at 1-3B: ✅ HIGHLY EFFECTIVE**
-
-**Evidence:**
-- Grammar-constrained decoding "substantially outperforms unconstrained LMs or even beats task-specific finetuned models" (arXiv:2305.13971). LLaMA-33B with GCD achieved 36.0 F1 vs. 17.5 F1 unconstrained — more than doubling performance.
-- "Smaller models are more liable to produce non-valid output, meaning GCD is especially valuable for researchers working in memory-constrained environments" (Cooper, 2024).
-- GCD guarantees 100% parse tree validity vs. 64.2% unconstrained (constituency parsing benchmark).
-- Constrained decoding achieves ~50% faster generation than unconstrained for structured output (arXiv:2501.10868) because structural scaffolding (field names, brackets, numbering) bypasses the generation process entirely.
-- The SINE interactive fiction research demonstrated GBNF grammar-guided decoding achieving 68-86% success rates for IF generation in the Ink scripting language (noted in BL-010).
-
-**Limitations:**
-- **Grammar-model misalignment:** When forced outputs diverge significantly from what the model would naturally predict, semantic quality can degrade. The grammar should allow natural language within structural constraints, not over-constrain prose.
-- **~5-10% per-token overhead** for grammar evaluation (BL-010 estimate).
-- Requires local inference (llama.cpp) — not available via API. This is fine for DANTE TERMINAL (fully on-device).
-
-**Optimal GBNF grammar for DANTE TERMINAL:**
+**Proposed GBNF grammar for DANTE TERMINAL:**
 ```gbnf
-root        ::= narrative "\n\n" suggestions
-narrative   ::= sentence (" " sentence)* (" " sentence)?
-sentence    ::= [A-Z] [a-zA-Z0-9 ,;:''""'!\-—.…?]+ "."
+root ::= narrative "\n\n" suggestions
+narrative ::= sentence (" " sentence)* ("\n" sentence (" " sentence)*)*
+sentence ::= [A-Z] [a-zA-Z0-9 ,;:'"!?.\-\u2014\u2019()]+ "."
 suggestions ::= "> 1. " suggestion "\n> 2. " suggestion "\n> 3. " suggestion "\n"
-suggestion  ::= [A-Z] [a-zA-Z0-9 ,.'!?\- ]+
+suggestion ::= [A-Z] [a-zA-Z0-9 ,.'!?\- ]+
 ```
 
-This allows free-form narrative prose (any number of sentences) while enforcing exactly 3 numbered suggestions. The narrative section is minimally constrained — only requiring sentences to start with a capital letter and end with a period — preserving creative freedom.
+**Caveats:**
+- Overly restrictive grammars can "degrade narrative quality" by contorting phrasing to fit constraints [BL-010, Section 3.2]
+- The narrative portion should be as unconstrained as possible -- only enforce the suggestion structure
+- "Grammar masking on top of reasoning prompts did not consistently improve outcomes" -- grammars work best for structural enforcement, not semantic guidance [MDPI 2025]
+- Performance gotcha: avoid `x?` repetition patterns; use `x{0,N}` instead [llama.cpp docs]
 
-**Rating: HIGHLY EFFECTIVE — the single most reliable technique for structured output on small models. Non-negotiable for DANTE TERMINAL.**
+**Token cost:** Zero additional prompt tokens. CPU overhead ~5-10% per token during decoding.
 
-### 2.5 Repeat-Instruction Anchoring
+**Rating: EFFECTIVE** -- The definitive solution to BL-012's "never outputs the format" problem. Non-negotiable for BL-005.
 
-**Technique:** Repeat key instructions at multiple points in the prompt (system prompt header AND near the generation point) to counteract instruction drift over long contexts.
+### 2.3 Repeat-Instruction Anchoring -- EFFECTIVE
 
-**Effectiveness at 1-3B: ✅ EFFECTIVE**
+**What it is:** Re-injecting critical instructions (tone, format, length) near the generation point rather than relying solely on the system prompt at the top of context.
 
-**Evidence:**
-- "Lost in the Middle" research (Liu et al., 2024) proves that information at the beginning and end of context has the strongest influence on generation. Instructions only at the top of context fade as conversation grows.
-- The "Author's Note" pattern — placing style directives 3 paragraphs before the generation point — is universally adopted by AI Dungeon, NovelAI, and KoboldAI (BL-010). All three products independently discovered that style instructions near the generation point have "maximum influence" on output.
-- Contextual anchoring literature confirms: "LLMs weigh the initial context of prompts significantly" and "by seeding prompts with the right domain vocabulary or prior information, developers anchor the model's response" (Lakera, 2026).
-- For small models with limited attention capacity, repeat-instruction anchoring is even more critical than for large models, because the attention mechanism has fewer parameters to maintain long-range dependencies.
-
-**Optimal configuration for DANTE TERMINAL:**
-- **System prompt header:** Full instructions (role, rules, constraints) — ~100-150 tokens
-- **Author's Note (near generation point):** Compressed reminder — ~25-35 tokens: `[Style: sardonic narrator, sensory detail, atmospheric. Max 90 words. Exactly 3 suggestions.]`
-- The Author's Note should be inserted after conversation history but before the current player input, placing it in the high-influence zone near generation.
-
-**Rating: EFFECTIVE — essential for maintaining instruction adherence across multi-turn interactive fiction sessions.**
-
-### 2.6 Negative Examples ("Do NOT...")
-
-**Technique:** Explicitly instruct the model to avoid specific failure modes: "Do NOT break character," "Do NOT generate more than 3 suggestions," "Do NOT include meta-commentary."
-
-**Effectiveness at 1-3B: ❌ INEFFECTIVE (counterproductive)**
+**Why it works at small scale:** Exploits the well-documented recency bias in transformer attention -- tokens near the generation point receive disproportionate attention weight. "The relative importance of the system prompt with respect to the context decreases as the context length increases" [8]. This is the same principle as the Author's Note pattern (BL-010, Section 1.2).
 
 **Evidence:**
-- Research on hallucination mitigation (Frontiers in AI, 2025) found that "negative prompting can reduce fabrication in summarization and QA tasks." However, this finding applies to larger models with strong instruction following.
-- For small models, negative instructions are problematic for two reasons:
-  1. **They consume precious tokens** describing what NOT to do instead of demonstrating what TO do. With a 1,500-token budget, every token matters.
-  2. **Small models may fixate on the prohibited behavior** rather than avoiding it. The "don't think of a pink elephant" effect is well-documented in prompt engineering: mentioning a failure mode can prime the model to produce it.
-  3. **Incorrect negative examples can induce more hallucinations.** Microsoft's best practices note: "Always test with and without the examples to verify that they help."
-- BL-012 implicitly tested this: the system prompt said "respond with exactly 3 suggestions" (positive framing), but neither model complied. Adding "do NOT skip suggestions" would not have helped — the model lacks the instruction-following capacity, not the intent.
+- "Repeating or echoing critical guidance (especially at the tail) helps the model stay on track" -- Positional Prompting research [16]
+- "Early and late tokens receive disproportionate influence in attention scores" [16]
+- System prompt repetition is one of the two most effective persona drift mitigations, "excelling in regions with a larger number of turns" [5]
+- All major IF products (AI Dungeon, NovelAI, KoboldAI) independently converged on this pattern via the Author's Note -- placing style directives 2-3 paragraphs before the generation point [BL-010]
 
-**Optimal configuration for DANTE TERMINAL:**
-- **Do NOT use negative examples in the system prompt.** Use the token budget for positive demonstrations (few-shot examples) and mechanical enforcement (GBNF grammar) instead.
-- The one exception: a single brief negative constraint in the Author's Note can work if phrased as a positive: "Always advance the story" instead of "Do NOT refuse player actions."
+**Recommended implementation for DANTE TERMINAL:**
+```
+[... narrative history ...]
 
-**Rating: INEFFECTIVE — wastes tokens and can prime failure modes. Use positive framing + mechanical enforcement instead.**
+[Style: sardonic narrator, sensory detail, max 90 words. Exactly 3 suggestions.]
 
-### 2.7 Chain-of-Thought (CoT) Prompting
+Player: {current action}
+GM:
+```
 
-**Technique:** Ask the model to "think step by step" before generating its final answer, improving reasoning quality.
+This 15-20 token anchor near the generation point reinforces the three most critical constraints: tone, length, and suggestion count.
 
-**Effectiveness at 1-3B: ❌ INEFFECTIVE (harmful at small scale)**
+**Token cost:** 15-30 tokens per turn (the anchor note). Over a 15-turn session, this costs 225-450 tokens total -- but prevents the much costlier failure of losing persona coherence.
 
-**Evidence:**
-- The hallucination survey (Frontiers in AI, 2025) explicitly states: "Smaller models cannot process and utilize the multi-step dependencies that CoT relies on, thus yielding lower accuracy than standard prompting methods."
-- The JMLR scaling study (Chung et al., 2024) found CoT benefits emerge primarily above 8B parameters. Below that threshold, CoT instructions consume tokens without improving output quality.
-- CD-CoT research shows that "noisy rationales" in chain-of-thought prompting (where intermediate reasoning steps are irrelevant or incorrect) cause "LLMs performing worse with flawed rationales than with no examples at all." Small models produce noisy rationales more frequently.
-- For creative narrative generation specifically, CoT is inappropriate — the output should be atmospheric prose, not step-by-step reasoning. CoT would produce "Step 1: The room is dark. Step 2: There is a door..." instead of evocative fiction.
+**Rating: EFFECTIVE** -- Essential for maintaining persona and format compliance beyond turn 5. Directly addresses the persona drift documented in Section 1.3.
 
-**Optimal configuration for DANTE TERMINAL:**
-- **Do NOT use chain-of-thought prompting.** It wastes tokens, degrades quality at small scale, and is inappropriate for creative narrative output.
-- The exception: Intra's "guided thinking" pattern (Section 1.3 of BL-010) uses structured questions to force outcome commitment *before* narration. This is a constrained variant of CoT that works with small models because the questions are simple binary choices, not open-ended reasoning. Consider this for action resolution but NOT for narrative generation.
+### 2.4 Role-Play Framing -- EFFECTIVE (with caveats)
 
-**Rating: INEFFECTIVE — actively harmful for sub-8B models. Inappropriate for creative narrative tasks.**
+**What it is:** Framing the model's task as a character role ("You are the Game Master of DANTE TERMINAL") rather than a generic instruction ("Generate interactive fiction responses").
 
-### 2.8 Few-Shot with Task Scoping (Narrow Task Decomposition)
-
-**Technique:** Instead of asking the model to perform the complex task of "generate narrative + parse game state + produce suggestions" in one call, decompose into narrow sub-tasks with dedicated prompts.
-
-**Effectiveness at 1-3B: ✅ EFFECTIVE (but adds latency)**
+**Why it works at small scale:** Role-play framing activates role-specific patterns from the model's training data (RP datasets, character.ai-style interactions, SillyTavern conversations). At the 3B scale, models have seen substantial role-play training data -- Qwen 2.5 specifically notes "enhanced role-play implementation and condition-setting for chatbots" [1].
 
 **Evidence:**
-- Research on small language models for game content (arXiv:2601.23206) demonstrated that a 1B model can achieve 92.5% success when "each model handles a single, narrow task rather than being a general-purpose narrator."
-- The SINE interactive fiction research showed improved results when separating narrative generation from game mechanics extraction.
-- BL-010 noted this as "aggressive task scoping" — the most reliable approach for small models, at the cost of latency from multiple inference calls.
+- "Prompts that include role instructions help the model anchor its response" [codeconductor.ai]
+- BL-012 confirmed: Phi-3 "stays in character as a narrator" while TinyLlama "generates both player and GM dialogue, breaking immersion entirely" -- the 3B+ threshold enables basic role adherence
+- Qwen 2.5 is specifically noted for being "more resilient to diversity of system prompts, enhancing role-play implementation" [1]
 
-**Optimal configuration for DANTE TERMINAL:**
-- **Primary approach (single-call):** Use GBNF grammar to enforce narrative + suggestions format in one inference call. This avoids the latency penalty.
-- **Fallback (two-pass):** If GBNF degrades narrative quality (grammar-model misalignment), use a two-pass approach: (1) generate narrative unconstrained, (2) generate suggestions with GBNF grammar using the narrative as context. Cost: ~4-8 seconds additional latency at 4 tok/s.
-- **Advanced option (multi-LoRA):** For v2, use genre-specific LoRA adapters to specialize the model per task. llama.cpp supports runtime LoRA loading.
+**Caveats:**
+- "Certain persona prompts reduce reliable@10 by up to 8.2%" [4] -- the specific wording matters. Overly elaborate persona descriptions can hurt instruction following.
+- Keep the role assignment concise: "You are the Game Master" (6 tokens) not "You are a sardonic, world-weary Game Master who has seen countless adventurers fail..." (25+ tokens). The elaboration goes in the Author's Note anchor, not the role definition.
 
-**Rating: EFFECTIVE — proven to dramatically improve small-model reliability, but latency cost must be weighed against BL-014's ≤3s TTFT target.**
+**Token cost:** 6-15 tokens for the role assignment.
 
-### Technique Effectiveness Summary Table
+**Rating: EFFECTIVE** -- Basic role-play framing works at 3B scale. Keep it concise; elaborate personality goes in the Author's Note anchor.
 
-| # | Technique | 1B Rating | 3B Rating | Token Cost | Evidence Strength |
-|---|-----------|-----------|-----------|------------|-------------------|
-| 1 | Few-shot examples (1-2) | Effective | **Effective** | ~100-150 tokens | Strong (multiple papers) |
-| 2 | XML/JSON structured prompting | Ineffective (output) | Degraded (output) | ~20-40 tokens | Moderate |
-| 3 | Role-play framing | Ineffective | Degraded | ~20-30 tokens | Moderate (BL-012 + PromptHub) |
-| 4 | GBNF constrained decoding | **Highly Effective** | **Highly Effective** | 0 prompt tokens | Strong (arXiv:2305.13971) |
-| 5 | Repeat-instruction anchoring | Effective | **Effective** | ~25-35 tokens | Strong ("Lost in Middle") |
-| 6 | Negative examples | Ineffective | Ineffective | Wasteful | Moderate (against) |
-| 7 | Chain-of-thought | Harmful | Ineffective | Wasteful | Strong (against) |
-| 8 | Task scoping/decomposition | Effective | Effective | Latency cost | Strong (arXiv:2601.23206) |
+### 2.5 XML/Tag-Structured Prompting -- DEGRADED
+
+**What it is:** Using XML-like tags (`<instructions>`, `<context>`, `<output>`) to delimit sections of the prompt.
+
+**Why it's degraded at small scale:** XML tag understanding requires the model to have learned tag semantics from training data. Large models (Claude, GPT-4) are explicitly trained on tagged prompts; small open-weight models have less exposure.
+
+**Evidence:**
+- Claude and GPT-4 show clear improvements from XML structuring; smaller models show inconsistent results [arxiv:2509.08182]
+- Community practice: SillyTavern/KoboldAI ecosystems use minimal tagging (`[SYSTEM]`, `[EXAMPLE]`) rather than full XML for local models
+- BL-010's proposed prompt uses simple bracket tags (`[WORLD STATE]`, `[STYLE]`) not XML -- this is the right level of structure for 3B models
+
+**Recommendation:** Use simple bracket/label tags (`[WORLD STATE]`, `[EXAMPLE]`, `[Style:]`) as section delimiters. Avoid nested XML (`<instructions><format><suggestions>...</suggestions></format></instructions>`) which wastes tokens and may confuse small models.
+
+**Token cost:** 5-10 tokens per section tag (brackets) vs. 15-30 tokens (full XML with opening/closing tags).
+
+**Rating: DEGRADED** -- Simple label tags work; full XML structure is wasted effort at 1-3B scale.
+
+### 2.6 Negative Examples ("Don't do this") -- INEFFECTIVE
+
+**What it is:** Including examples of unwanted behavior or explicit "do not" instructions to prevent specific failure modes.
+
+**Why it's ineffective at small scale:** Language models process negative instructions by first activating the concept being negated -- the "Pink Elephant Problem." "Instructions like 'don't uppercase names' frequently fail. Instead, positively phrased instructions like 'always lowercase names' consistently deliver better results" [14]. This effect is amplified in small models where instruction parsing is already weak (Section 1.1).
+
+**Evidence:**
+- "Token generation inherently leans toward positive selection -- choosing what token comes next, rather than explicitly avoiding certain tokens" [14]
+- "Language models like GPT-3 and GPT-Neo consistently struggle with negation across multiple benchmarks" [14] -- and these are larger models than our targets
+- "The Ironic Process Theory suggests that trying to suppress a specific thought makes it more likely to surface" -- telling a 3B model "Don't generate dialogue for the player" risks activating exactly that behavior [13]
+- Alignment research confirms: "Existing alignment methods primarily focus on positive examples while overlooking the importance of negative responses" [NEAT, OpenReview]
+
+**What to do instead:** Reframe every "don't" as a "do":
+- ~~"Don't generate player dialogue"~~ -> "Narrate only the GM's response"
+- ~~"Don't write more than 90 words"~~ -> "Respond in 2-3 sentences, under 90 words"
+- ~~"Don't forget the suggestions"~~ -> (use GBNF grammar -- mechanical enforcement)
+- ~~"Don't break character"~~ -> (use repeat-instruction anchoring)
+
+**Token cost:** Negative examples waste tokens and risk activating the unwanted behavior. Net negative value.
+
+**Rating: INEFFECTIVE** -- Actively harmful at small scale. Always reframe as positive instructions.
+
+### 2.7 Chain-of-Thought (CoT) -- DEGRADED
+
+**What it is:** Asking the model to "think step by step" or show its reasoning process before generating the final output.
+
+**Why it's degraded at small scale:** CoT requires the model to maintain coherent multi-step reasoning, which degrades rapidly below 7B parameters. The tokens spent on reasoning are also tokens NOT spent on narrative quality -- a costly trade-off in a 1,500-token budget.
+
+**Evidence:**
+- Reasoning capability scales at N^0.4 [17] -- meaning a 3B model has roughly (3/70)^0.4 ~ 20% of a 70B model's reasoning capability
+- GSM8K (math reasoning): Llama 3.2 3B scores 77.7% vs. Llama 3.1 70B at ~95% -- a meaningful gap for structured reasoning
+- Intra's "guided thinking" pattern (BL-010, Section 1.3) uses structured questions to force step-by-step outcomes -- this works better than free-form CoT because it constrains the reasoning format
+
+**Situational use:** CoT is worth the token cost ONLY for complex action resolution where the narrative consequence isn't obvious (e.g., "I throw the lamp at the bookshelf" -> needs reasoning about fire, damage, inventory change). For standard exploration/dialogue turns, CoT wastes 50-100 tokens that should go to narrative quality.
+
+**Rating: DEGRADED** -- Skip for standard turns. Consider Intra-style guided questions for complex action resolution only.
+
+### 2.8 JSON-Structured Output Prompting -- DEGRADED (without grammar)
+
+**What it is:** Asking the model to produce output in JSON format through prompt instructions alone (without constrained decoding).
+
+**Why it's degraded at small scale:** "Small open-weight models like Llama-3.2-1B, 3B, and Mistral-7B-v0.2 achieve near-zero schema accuracy and content similarity across most datasets through direct prompting" [3]. JSON requires precise syntax -- a single missing quote, comma, or brace breaks the output.
+
+**Evidence:**
+- Llama 3.2-1B unconstrained: 38-90% compliance depending on complexity (Section 1.2)
+- JSON parseability is the highest among formats (vs. YAML, XML) when it works, but failure rate is also high without enforcement [3]
+
+**Recommendation:** If JSON output is needed (e.g., for game state extraction), ALWAYS pair with GBNF grammar or JSON schema constraint. Never rely on prompt instructions alone for JSON at 1-3B scale.
+
+**Rating: DEGRADED** -- Use GBNF grammar for any structured output requirement. Prompting alone is insufficient.
 
 ---
 
@@ -301,282 +298,211 @@ This allows free-form narrative prose (any number of sentences) while enforcing 
 
 ### 3.1 Recommended System Prompt Structure
 
-Based on the research above, here is the concrete prompt structure template optimized for 1-3B models generating interactive fiction for DANTE TERMINAL.
-
-**Total prompt budget: ≤1,500 tokens** (BL-012 safe zone, BL-014 memory constraint)
+Based on the research above, here is the optimized prompt architecture for DANTE TERMINAL at 1-3B parameter scale:
 
 ```
-┌─────────────────────────────────────────────────┐
-│ ZONE 1: SYSTEM INSTRUCTIONS (~80-100 tokens)    │
-│ Compact role + rules. No negative examples.     │
-│ No chain-of-thought. Positive framing only.     │
-├─────────────────────────────────────────────────┤
-│ ZONE 2: FEW-SHOT EXAMPLE (~100-120 tokens)      │
-│ Exactly 1 example showing:                      │
-│   - Player input                                │
-│   - GM response (2-3 atmospheric sentences)     │
-│   - Exactly 3 numbered suggestions              │
-│ Implicitly teaches: tone, length, format        │
-├─────────────────────────────────────────────────┤
-│ ZONE 3: WORLD STATE (~100-150 tokens)           │
-│ Injected fresh every turn. Authoritative.       │
-│ Compact key-value format: location, inventory,  │
-│ quest flags, act, turn, NPC present.            │
-├─────────────────────────────────────────────────┤
-│ ZONE 4: THEME OVERLAY (~50-80 tokens)           │
-│ Keyword-triggered. Only present when relevant.  │
-│ Setting vocabulary, active NPC descriptions.    │
-├─────────────────────────────────────────────────┤
-│ ZONE 5: STORY SUMMARY (~100-150 tokens)         │
-│ Compressed history of earlier turns.            │
-│ Updated every 5-6 turns via summarization.      │
-├─────────────────────────────────────────────────┤
-│ ZONE 6: RECENT HISTORY (~400-500 tokens)        │
-│ Last 2-3 verbatim exchanges (player + GM).      │
-│ Primary context for coherent continuation.      │
-├─────────────────────────────────────────────────┤
-│ ZONE 7: AUTHOR'S NOTE (~25-35 tokens)           │
-│ Repeat-instruction anchor near generation point.│
-│ Compressed style + constraint reminder.         │
-├─────────────────────────────────────────────────┤
-│ ZONE 8: CURRENT INPUT (~10-30 tokens)           │
-│ "Player: {action}\nGM:"                         │
-└─────────────────────────────────────────────────┘
-```
+[SYSTEM PROMPT -- ~80 tokens, lean and directive]
+You are the Game Master of DANTE TERMINAL.
+Narrate atmospheric scenes in 2-3 sentences (under 90 words).
+Use vivid sensory detail. Always advance the story.
+End with exactly 3 action suggestions the player can take.
 
-**Total: ~865-1,165 tokens**, leaving 335-635 tokens of headroom within the 1,500-token budget for longer conversations or theme-specific content.
-
-### 3.2 Concrete Prompt Template
-
-```
-[SYSTEM]
-You are the Game Master of DANTE TERMINAL. Narrate interactive fiction.
-Rules: (1) Respond in 2-3 atmospheric sentences, under 90 words.
-(2) Use sensory details — sounds, textures, light, smell.
-(3) Always advance the story — every response changes something.
-(4) End with exactly 3 action suggestions for the player.
-(5) Acknowledge every player action with consequences.
-
-[EXAMPLE]
+[FEW-SHOT EXAMPLE -- ~130 tokens, demonstrates everything]
 Player: look around the room
-GM: Dust motes drift through a shaft of grey light from a crack overhead. The archive's east wing stretches before you — shelves of waterlogged books lean at drunken angles, and something metallic glints beneath a collapsed desk. The air tastes of copper and old paper.
+GM: Dust motes drift through a shaft of grey light from a crack in the
+ceiling. Rust-eaten shelves lean at drunken angles, and something metallic
+glints beneath a collapsed desk. The air tastes of copper and old paper.
 
 > 1. Investigate the metallic glint under the desk
-> 2. Wade north into the flooded corridor
-> 3. Examine the waterlogged books on the nearest shelf
+> 2. Examine the waterlogged books on the nearest shelf
+> 3. Search for another way deeper into the archive
 
-[STATE]
-Location: {location}
-Inventory: {inventory_csv}
-Flags: {quest_flags_csv}
-Act: {act_number} | Turn: {current}/{max}
-NPCs: {present_npcs}
+[WORLD STATE -- ~100-150 tokens, injected every turn]
+Location: The Sunken Archive - East Wing
+Inventory: oil lamp, torn map fragment
+Flags: east_wing_explored, ghost_encountered
+Act: II | Turn: 12/25
 
-[THEME: {theme_name}]
-{keyword_triggered_theme_content}
+[THEME OVERLAY -- ~50-80 tokens, keyword-triggered]
+{Setting-specific vocabulary, active NPC description if present}
 
-[PREVIOUSLY]
-{compressed_summary_of_earlier_turns}
+[STORY SUMMARY -- ~100-200 tokens, compressed old turns]
+Previously: {2-3 sentence summary of events before the sliding window}
 
-[RECENT]
-Player: {turn_n_minus_2_action}
-GM: {turn_n_minus_2_response}
+[RECENT HISTORY -- ~400-600 tokens, last 2-3 verbatim exchanges]
+Player: {previous action}
+GM: {previous response with suggestions}
 
-Player: {turn_n_minus_1_action}
-GM: {turn_n_minus_1_response}
+[ANCHOR NOTE -- ~20 tokens, near generation point]
+[Style: sardonic narrator, sensory detail, max 90 words.]
 
-[STYLE]
-Sardonic narrator. Sensory detail. Atmospheric tension. Max 90 words. 3 suggestions.
-
-Player: {current_action}
+Player: {current action}
 GM:
 ```
 
-**Recommended system prompt token count range: 80-100 tokens** (Zone 1 only). The full assembled prompt should be **900-1,200 tokens** in typical gameplay, never exceeding 1,500.
+**Total token budget: ~880-1,260 tokens** -- well within the 1,500-token safe zone from BL-012.
+
+### 3.2 Recommended System Prompt Token Count
+
+| Section | Token Count | Fixed/Dynamic | Notes |
+|---------|------------|---------------|-------|
+| System prompt | 70-90 | Fixed | 5-6 concise directive sentences |
+| Few-shot example | 120-140 | Fixed | 1 example only; quality over quantity |
+| World state | 80-150 | Dynamic | Grows with inventory/flags; cap at 150 |
+| Theme overlay | 0-80 | Dynamic | Only when keyword-triggered |
+| Story summary | 80-200 | Dynamic | Grows as game progresses; compress aggressively |
+| Recent history | 300-600 | Dynamic | Last 2-3 exchanges; trim oldest first |
+| Anchor note | 15-25 | Fixed | Style reinforcement near generation point |
+| **Total** | **665-1,285** | -- | **Target: <=1,200 to leave buffer** |
+
+**Critical constraint:** The system prompt (fixed instructions + example) should not exceed **230 tokens total**. Every token spent on instructions is one fewer token for narrative history and world context. At 1-3B scale, shorter system prompts correlate with better instruction adherence because:
+1. The model has less to parse and prioritize
+2. More budget remains for the few-shot example (which is more effective than instructions)
+3. The "lost in the middle" effect is less severe with shorter total context
 
 ### 3.3 Suggestion Generation Approach
 
-**Primary: GBNF grammar-constrained single-call generation** (Section 2.4)
+**Primary: GBNF grammar-constrained inline generation**
 
-The GBNF grammar enforces the narrative + 3 suggestions structure at the token level. The model generates freely within the narrative section, then is mechanically forced to produce exactly 3 numbered suggestions. This:
-- Eliminates the suggestion format failure from BL-012 (0/5 compliance for both models)
-- Adds only ~5-10% per-token overhead
-- Works with any model, regardless of instruction-following capability
-- Is already supported by llama.cpp (BL-008), our chosen inference SDK
+Generate narrative + suggestions in a single inference call, with the grammar enforcing exactly 3 suggestions after the narrative block. This is the only approach that guarantees 100% format compliance at 1-3B scale.
 
-**Fallback: Two-pass generation** if GBNF causes grammar-model misalignment and degrades narrative quality:
-1. Pass 1: Generate narrative unconstrained (~80-120 tokens, ~10-15s at 4-8 tok/s)
-2. Pass 2: Short prompt "Given the scene above, suggest 3 actions:" with GBNF grammar (~30-50 tokens, ~4-8s)
-3. Total latency: ~14-23s — acceptable within BL-013's 25-40s turn target but above the ideal
+**Why not separate calls:**
+- BL-014's latency budget: <=3.0s TTFT, >=4 tok/s decode. A second inference call adds 2-8 seconds.
+- BL-013's pacing: 25-40s per turn. With a single call at ~4-8 tok/s generating ~100-150 tokens, that's 12-37 seconds -- acceptable. A second call pushes this toward or beyond the upper bound.
+- Single-call with grammar is both faster and more reliable than two-pass.
 
-**Emergency fallback: Post-processing extraction** from unconstrained output using regex/heuristic parsing, with generic contextual suggestions as safety net.
+**Fallback: Post-processing extraction + generic suggestions**
 
-### 3.4 Context Management That Minimizes Instruction Drift
+If GBNF grammar degrades narrative quality (Section 2.2 caveat), fall back to:
+1. Generate narrative unconstrained
+2. Use regex to extract any suggestion-like phrases
+3. If extraction fails, generate 3 contextual suggestions from the world state (e.g., "Explore further north", "Examine your surroundings", "Check your inventory")
 
-The research overwhelmingly shows that context growth is the primary enemy of instruction adherence. The mitigation strategy:
+### 3.4 Context Format That Minimizes Instruction Drift
 
-1. **Hard context cap at ~1,500 prompt tokens.** Per BL-012's empirical finding: Phi-3-mini collapses catastrophically at ~2,500 tokens. The 1,500-token budget provides a safety margin.
+The research points to three structural principles:
 
-2. **Per-turn state serialization** (Zone 3). Inject game state fresh every turn as authoritative ground truth. The model never needs to "remember" state from conversation history — it reads it from the state block.
+**Principle 1: Bookend critical instructions** -- Place the role assignment and core rules at the TOP (primacy) and the style anchor at the BOTTOM (recency). The middle is for dynamic content that can tolerate some attention decay.
 
-3. **Sliding-window summarization** (Zone 5). Every 5-6 turns, compress the oldest verbatim exchanges into a 2-3 sentence "previously" summary. This matches AI Dungeon's 6-action memory window and BL-012's ~5-turn coherence window.
+**Principle 2: Use the few-shot example as the primary instructor** -- The example teaches format, length, tone, and suggestion structure simultaneously. The system prompt text is a secondary reinforcement, not the primary teaching mechanism.
 
-4. **Author's Note anchor** (Zone 7). Place compressed style/constraint instructions immediately before the current player input. This exploits the "Lost in the Middle" finding that information at the end of context has the strongest influence on generation.
-
-5. **max_tokens hard cap at 200.** Prevents runaway response length (BL-012 saw 300-500 token responses). Combined with the few-shot example (~80 words) and Author's Note ("Max 90 words"), this triple reinforcement controls length.
+**Principle 3: Keep total context under 1,200 tokens** -- BL-012 showed catastrophic collapse at ~2,500 tokens and degradation starting around 1,500. Keeping a buffer of 300+ tokens below the safe zone ensures quality doesn't degrade as the game progresses.
 
 ---
 
-## 4. Risk Mitigations: Failure Modes and Countermeasures
+## 4. Risk Mitigations: Failure Modes and Prompt-Level Countermeasures
 
 ### 4.1 Character Name Amnesia
 
-**Failure mode:** The model forgets NPC names, the player's quest, or location names mid-adventure. Names mentioned in early turns fade as context grows.
+**Failure mode:** The model forgets NPC names, player inventory items, or location names introduced more than 3-4 turns ago.
 
-**Root cause:** "Lost in the Middle" effect — information from earlier turns has weakened influence. Small models have limited attention capacity for maintaining multiple named entities across turns.
-
-**Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **Per-turn state injection** | Include NPC names, location, and quest in `[STATE]` block every turn. Model reads state, not memory. | High — state is re-read every turn |
-| P1 | **Keyword-triggered lore** | When NPC name appears in state or recent history, inject their description from theme overlay. | Medium — depends on keyword matching |
-| P2 | **Summary reinforcement** | Include key names in the `[PREVIOUSLY]` summary: "You've been exploring the Sunken Archive with archivist Maren." | Medium — summary must be concise |
-
-### 4.2 Tone Drift (Losing the Sardonic/Atmospheric Voice)
-
-**Failure mode:** The model gradually shifts from the desired "sardonic, atmospheric" narrator voice to generic, bland prose or overly cheerful/helpful assistant tone. Common after 5+ turns.
-
-**Root cause:** Persona fading over context growth ("Lost in Conversation" -39% degradation). The model's default assistant training overrides the persona instruction as it recedes in context.
+**Root cause:** Information in narrative history falls into the "lost in the middle" attention dead zone as more turns accumulate. Small models have weaker attention across long contexts.
 
 **Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **Author's Note anchor** | `[STYLE] Sardonic narrator. Sensory detail. Atmospheric tension.` placed immediately before current input — maximum proximity influence. | High — proven by AI Dungeon/NovelAI/KoboldAI |
-| P1 | **Few-shot tone calibration** | The single example in Zone 2 demonstrates the target tone. Model mimics the demonstrated style. | Medium — effective for 3-5 turns, then fades |
-| P2 | **Genre-specific LoRA** | Fine-tune LoRA adapters per theme (horror, noir, sci-fi, dungeon) that bake tone into weights. Eliminates need for prompt-based tone instruction. | High — but requires fine-tuning investment (v2) |
-| P3 | **Temperature tuning** | 0.7-0.8 temp with 0.9 top_p. Lower temp reduces randomness but maintains coherence. Repeat penalty 1.05-1.15 prevents the "Alrighty then!" loops seen in BL-012. | Medium — global setting, not per-turn adaptive |
+1. **World state injection (P0):** Include all active NPC names, inventory, and current location in the `[WORLD STATE]` block at the top of every prompt. The model reads this fresh each turn -- it doesn't need to "remember" from history.
+2. **Story summary with names (P1):** When compressing old turns into the summary, explicitly preserve proper nouns: "Previously: You met **Aldric the Keeper** in the West Hall and received the **silver key**."
+3. **Keyword-triggered lore (P2):** When an NPC name appears in the world state, inject their 50-100 token description (BL-010, Strategy 2).
+
+**Expected effectiveness:** High. Per-turn state serialization (BL-010 Strategy 3) eliminates reliance on the model's memory entirely. This is a solved problem if implemented correctly.
+
+### 4.2 Tone Drift (Sardonic -> Generic Assistant)
+
+**Failure mode:** The GM's sardonic, atmospheric narrative voice gradually shifts toward bland, helpful assistant-style responses ("That's a great idea! Let me describe what you see...").
+
+**Root cause:** Small models are heavily RLHF'd toward helpful-assistant behavior. Without reinforcement, the default "helpful AI" persona overwhelms the game master persona within 6-10 turns (Section 1.3).
+
+**Countermeasures:**
+1. **Anchor note near generation point (P0):** The `[Style: sardonic narrator, sensory detail, max 90 words.]` note placed 1-2 lines before `GM:` exploits recency bias to maintain tone. This is the single most impactful mitigation.
+2. **Few-shot example sets the tone baseline (P0):** The example response should be unmistakably sardonic/atmospheric -- the model pattern-matches this more reliably than it follows tone instructions.
+3. **Role framing (P1):** "You are the Game Master" activates RP training data rather than assistant training data.
+4. **Avoid trigger phrases (P1):** Don't include helper-assistant language anywhere in the prompt ("help the player," "assist the user"). Use game-master language ("narrate," "describe," "present options").
+5. **Genre-specific LoRA (P2, future):** A LoRA fine-tuned on atmospheric fiction would override the assistant baseline -- but this is a v2 enhancement.
+
+**Expected effectiveness:** Moderate. The anchor note + few-shot example combination should maintain tone for 10-15 turns in most cases. Beyond 15 turns, some drift is likely unavoidable at 3B scale without fine-tuning.
 
 ### 4.3 Suggestion Count Non-Compliance
 
-**Failure mode:** The model outputs 0, 1, 2, 4, or more suggestions instead of exactly 3. Or it embeds suggestions in the narrative text rather than as a separate numbered list. This was a 100% failure rate in BL-012 (both models, every turn).
+**Failure mode:** The model generates 0, 1, 2, 4, or 5 suggestions instead of exactly 3.
 
-**Root cause:** Small models have weak structured output compliance (Section 1.2). Natural-language instructions to "end with exactly 3 suggestions" are ignored because the model lacks the instruction-following capacity, not the intent.
-
-**Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **GBNF grammar enforcement** | Grammar forces exactly `> 1.` + `> 2.` + `> 3.` after the narrative section. Invalid token sequences are masked at generation time. 100% compliance guaranteed. | **Very High** — mechanical guarantee |
-| P1 | **Few-shot example** | Example shows exactly 3 suggestions in the correct format, reinforcing the pattern. | Medium — helps but insufficient alone |
-| P2 | **Post-processing fallback** | If GBNF is disabled (debugging, testing), regex extraction with generic fallback suggestions. | Low — unreliable but better than nothing |
-
-### 4.4 Context Window Overflow (Catastrophic Collapse)
-
-**Failure mode:** As the adventure progresses, the accumulated context exceeds the model's effective processing capacity (~1,500 tokens for 3B Q4 models per BL-012). Output degenerates into repetitive or nonsensical text: "yoursurren-in in your in yours in thebreilessi" (BL-012 turn 7-8).
-
-**Root cause:** Attention mechanism cannot maintain coherence when prompt tokens approach quantized model capacity. Degradation is a cliff, not a slope — output goes from 4/5 quality to 0/5 in one turn.
+**Root cause:** Small models cannot reliably count or follow numeric constraints through prompting alone. BL-012: both tested models produced 0 suggestions despite explicit "exactly 3" instructions.
 
 **Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **Hard context budget** | App-level token counter. Never assemble a prompt exceeding 1,500 tokens. Trim oldest history first, then summarize. | **Very High** — prevents the failure mode entirely |
-| P1 | **Sliding-window summarization** | Every 5-6 turns, compress oldest verbatim exchanges into `[PREVIOUSLY]` summary (~100-150 tokens). Preserves narrative continuity within the budget. | High — proven pattern (AI Dungeon, KoboldAI) |
-| P2 | **Tokenizer-based counting** | Use the actual model tokenizer for token counting, not the 4-chars-per-token heuristic from BL-012 (which was "too conservative"). Accurate counting prevents surprise overflows. | High — straightforward implementation |
-| P3 | **Graceful degradation detection** | Monitor for repetition patterns (n-gram frequency) and coherence drops. If detected, force-trim context and warn the player with an in-fiction explanation ("Your vision blurs momentarily..."). | Medium — requires quality monitoring heuristics |
+1. **GBNF grammar (P0):** The grammar mechanically enforces exactly 3 suggestions. This is a 100% reliable solution -- the model literally cannot generate any other count.
+2. **Few-shot example (P0, backup):** The example shows exactly 3 suggestions, establishing the pattern even without grammar.
+3. **max_tokens cap (P1):** Set max_tokens to 200 to prevent runaway generation that might produce extra suggestions before the grammar terminates.
 
-### 4.5 Hallucinated Items/Locations (World State Inconsistency)
+**Expected effectiveness:** With GBNF grammar, this is fully solved (100% compliance). Without grammar, expect ~60-70% compliance with few-shot + instruction, based on benchmark data.
 
-**Failure mode:** The model invents items the player doesn't have, describes rooms that don't exist in the adventure, or contradicts established facts. BL-012 noted "no coherent world state" for TinyLlama and "good for ~4 turns" for Phi-3-mini before state errors appeared.
+### 4.4 Response Length Inflation
 
-**Root cause:** Small models generate plausible-sounding narrative without verifying against established state. They pattern-match from training data (generic fantasy/sci-fi tropes) rather than adhering to the specific world defined in the prompt.
+**Failure mode:** The model generates 300-500 token responses when 60-90 words (~80-120 tokens) are needed for mobile UI.
 
-**Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **Per-turn state injection** | Authoritative `[STATE]` block lists exactly what the player has and where they are. Model reads inventory from state, not from memory of past turns. | High — prevents most hallucinated items |
-| P1 | **Post-generation state validation** | Parse the model's response for item/location mentions. Cross-check against game state. Flag or silently correct contradictions before display. | Medium — requires NER/pattern matching |
-| P2 | **Constrained vocabulary in theme overlay** | Theme content lists valid locations, items, and NPCs. Invalid entities can be detected via exclusion. | Medium — increases theme authoring effort |
-
-### 4.6 Repetitive Output ("Alrighty then!" Loops)
-
-**Failure mode:** The model falls into repetitive phrasing patterns, reusing the same openings, transitions, or descriptive language across turns. BL-012 noted TinyLlama produced "near-identical copy-paste blocks with minor word changes" by turn 3-4.
-
-**Root cause:** Small models have limited vocabulary diversity and tend toward high-probability token sequences. Repetition is a well-known failure mode exacerbated by: low temperature, long context (model fixates on its own prior output), and weak instruction tuning.
+**Root cause:** Small instruction-tuned models default to verbose responses. BL-012 confirmed: "Both models produce 300-500 token responses. Mobile UI needs 100-150 tokens max."
 
 **Countermeasures:**
-| Priority | Technique | Implementation | Confidence |
-|----------|-----------|---------------|------------|
-| P0 | **repeat_penalty parameter** | Set `repeat_penalty` 1.05-1.15 in llama.cpp. Penalizes recently generated tokens, forcing vocabulary diversity. | High — direct mechanical intervention |
-| P1 | **Temperature calibration** | 0.7-0.8 temperature with 0.9-0.95 top_p. Balances creativity vs. coherence. BL-012 used 0.8/0.95 — reasonable defaults. | Medium — global tuning |
-| P2 | **Varied Author's Notes** | Rotate style descriptors: "gothic atmosphere," "creeping dread," "wry observation." Prevents the model from locking onto a single phrase pattern. | Medium — requires per-turn variation logic |
-| P3 | **Few-shot example diversity** | If using multiple examples (not recommended for token reasons), ensure they show different sentence structures and openings. | Low — token cost prohibitive |
+1. **max_tokens parameter (P0):** Hard cap at 180-200 tokens. Simple, reliable, but may cut mid-sentence.
+2. **Few-shot example length (P0):** A 60-80 word example implicitly calibrates the model's response length. "Few-shot calibration: The example in the system prompt implicitly teaches response length" (BL-010).
+3. **GBNF grammar termination (P1):** The grammar's `suggestions` rule naturally creates an endpoint -- after the 3rd suggestion, generation terminates.
+4. **Anchor note word count (P1):** "max 90 words" in the anchor note provides a secondary length constraint.
 
----
+**Expected effectiveness:** High. The combination of max_tokens + few-shot calibration + grammar termination provides triple redundancy.
 
-## Analysis: Connecting Research to DANTE TERMINAL Architecture
+### 4.5 Context Window Overflow
 
-### What the Research Changes vs. BL-010's Recommendations
+**Failure mode:** As the game progresses, accumulated history pushes total context beyond the safe zone, causing quality degradation or catastrophic collapse (BL-012 turn 6+).
 
-BL-010 studied prompt patterns from products using large cloud models. This research reveals three critical adjustments needed for small on-device models:
+**Root cause:** Without active context management, each turn adds ~100-300 tokens (player input + GM response), exhausting the budget in 5-8 turns.
 
-1. **System prompt length must be radically shorter.** BL-010's proposed prompt architecture totals ~950-1,300 tokens. This research confirms the budget is sound but emphasizes that Zone 1 (system instructions) must be ≤100 tokens — not the 350+ line system prompts used by AI Dungeon or the DEV Community D&D architecture. Every token spent on instructions is a token *not* available for conversation history, and conversation history is what makes the fiction feel coherent.
+**Countermeasures:**
+1. **Aggressive context windowing (P0):** Keep only the last 2-3 verbatim exchanges (~400-600 tokens). Older exchanges are compressed into the story summary.
+2. **Sliding-window summarization (P0):** Every 3-5 turns, compress the oldest verbatim exchange into 1-2 sentences in the story summary. Cap the summary at 200 tokens.
+3. **Token counting before inference (P0):** Use the model's tokenizer to count actual prompt tokens before each inference call. If total exceeds 1,200 tokens, compress more aggressively.
+4. **Theme overlay budget cap (P1):** Keyword-triggered lore has a hard 80-token cap. If multiple entries trigger, priority-rank and truncate.
 
-2. **GBNF grammar is not optional — it's mandatory.** BL-010 recommended GBNF as "primary" for suggestion format. This research strengthens that to **non-negotiable**: zero-shot structured output is 0% reliable at <4B parameters. Without GBNF, DANTE TERMINAL has no suggestion system.
+**Expected effectiveness:** High if implemented correctly. The 1,200-token target budget (Section 3.2) provides a 300-token buffer below the 1,500-token safe zone.
 
-3. **Chain-of-thought and negative examples are harmful.** BL-010 mentioned Intra's "guided thinking" as valuable. This research clarifies: structured question sequences (binary choices) work for small models; open-ended CoT does not. And negative examples ("do NOT break character") waste tokens and can prime the failure mode they attempt to prevent.
+### 4.6 Hallucinated Inventory/World State
 
-### Priority Stack for BL-005 Implementation
+**Failure mode:** The model references items the player doesn't have, mentions NPCs that don't exist, or describes locations inconsistently with established lore.
 
-Based on this research, BL-005 (Game Master prompt implementation) should implement techniques in this order:
+**Root cause:** Generative models will produce plausible-sounding content regardless of actual game state, especially when the context is ambiguous or the state information has been summarized away.
 
-1. **GBNF grammar** — guarantees structural compliance (suggestions format)
-2. **Per-turn state serialization** — guarantees world state consistency
-3. **1 few-shot example** — teaches format, tone, and length simultaneously
-4. **Author's Note anchoring** — maintains persona over multi-turn sessions
-5. **Hard context budget (1,500 tokens)** — prevents catastrophic collapse
-6. **max_tokens=200** — prevents response length runaway
-7. **Sliding-window summarization** — enables adventures longer than 5 turns
-8. **repeat_penalty=1.1** — prevents repetitive output loops
+**Countermeasures:**
+1. **Per-turn state injection (P0):** The `[WORLD STATE]` block is the authoritative source of truth. The model sees current inventory, location, and flags every turn.
+2. **State validation post-generation (P1):** After generation, programmatically check the response for references to items/NPCs not in the state. Flag or regenerate if hallucinated content is detected.
+3. **Positive-only inventory cues (P1):** List what the player HAS, not what they don't have. "Inventory: lamp, map" -- the model will draw from this list. Don't say "You don't have a sword" (Section 2.6 -- negative instructions are ineffective).
 
-### Model Selection Implications
-
-This research confirms and refines BL-008's model shortlist:
-
-| Model | Params | Effective Size | IF Strength | IF Weakness | Recommendation |
-|-------|--------|---------------|-------------|-------------|----------------|
-| **Llama 3.2 3B Q4_K_M** | 3B | ~2.0 GB | Strong IFEval (77.4), good instruction following | At iOS memory edge; no creative fine-tune | Primary candidate |
-| **Gemma 3n E2B Q4_K_M** | 6B (2B eff.) | ~1.2 GB | Memory-efficient, 32K context | Newer, less community testing | Strong candidate (solves iOS RAM) |
-| **Qwen 2.5 3B Instruct** | 3B | ~1.8 GB | Best role-play support, 128K context | Less tested for creative writing | Strong candidate for multi-theme |
-| **Phi-3.5-mini Q4** | 3.8B | ~2.2 GB | Confirmed good prose (BL-012) | Exceeds iOS memory budget; zero structured output compliance in few-shot | Fallback only |
+**Expected effectiveness:** Moderate-high. State injection prevents most hallucinations, but creative models may still introduce new elements not in the state. Post-generation validation catches the remainder.
 
 ---
 
 ## Sources
 
-### Published Research
-1. **"LLMs Get Lost In Multi-Turn Conversation"** — arXiv:2505.06120 (2025). Average -39% degradation in multi-turn settings, 112% increase in output variance.
-2. **"Lost in the Middle: How Language Models Use Long Contexts"** — Liu et al., TACL 2024 (doi:10.1162/tacl_a_00638). Performance degrades when relevant information is in the middle of context.
-3. **"Context Rot: How Increasing Input Tokens Impacts LLM Performance"** — Chroma Research (2025). 13.9-85% degradation with increasing context, even with perfect retrieval.
-4. **"Grammar-Constrained Decoding for Structured NLP Tasks without Finetuning"** — arXiv:2305.13971 (2023/2025). GCD doubles F1 performance, guarantees structural validity.
-5. **"Generating Structured Outputs from Language Models: Benchmark and Studies"** — arXiv:2501.10868 (2025). Constrained decoding achieves 50% faster generation, highest compliance rates.
-6. **"Small Models, Big Tasks: An Exploratory Empirical Study on Small Language Models for Function Calling"** — arXiv:2504.19277 (2025). Zero-shot JSON parsability: 7.34% best case at 1.3B; few-shot boosts to 89%.
-7. **"The Few-Shot Dilemma: Over-prompting Large Language Models"** — arXiv:2509.13196 (2025). 8B parameter threshold for effective few-shot comprehension; sub-4B models collapse with excessive examples.
-8. **"Scaling Instruction-Finetuned Language Models"** — Chung et al., JMLR 2024. CoT benefits emerge above 8B; instruction finetuning without CoT degrades reasoning.
-9. **"A Comprehensive Survey of Small Language Models"** — ACM TIST 2025 (doi:10.1145/3768165). 3B capability boundary for structured output compliance.
-10. **"Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone"** — arXiv:2404.14219 (2024). Phi-3-mini benchmarks and instruction following capabilities.
-11. **"A Guide to Structured Outputs Using Constrained Decoding"** — Cooper (2024). Practical GBNF implementation, grammar-model misalignment risks.
-12. **"High-quality generation of dynamic game content via small language models"** — arXiv:2601.23206 (2026). 92.5% success with 1B model via aggressive task scoping and LoRA.
-13. **"Evaluating Structured Output Robustness of Small Language Models"** — arXiv:2507.01810 (2025). Format comparison (JSON/YAML/XML) and model size effects on structured output.
-14. **"Quantifying Conversational Reliability of Large Language Models under Multi-Turn Interaction"** — arXiv:2603.01423 (2026). Loss of instruction adherence, intent confusion failure modes.
+### Published Benchmarks and Research Papers
+1. [Qwen2.5-LLM Technical Report](https://qwenlm.github.io/blog/qwen2.5-llm/) -- IFEval strict-prompt scores for Qwen 2.5 family (0.5B through 72B)
+2. [Llama 3.2 Benchmark Insights](https://medium.com/towards-agi/llama-3-2-benchmark-insights-and-revolutionizing-edge-ai-and-vision-88542fe3dc0d) -- IFEval 77.4 for Llama 3.2 3B, comparison with Gemma 2B and Phi-3.5-mini
+3. [Generating Structured Outputs from Language Models: Benchmark and Studies](https://arxiv.org/html/2501.10868v1) -- Llama 3.2-1B structured output compliance rates across datasets
+4. [Revisiting the Reliability of Language Models in Instruction-Following](https://arxiv.org/html/2512.14754v1) -- IFEval++ showing up to 61.8% degradation on nuanced instructions
+5. [Measuring and Controlling Persona Drift in Language Model Dialogs](https://arxiv.org/html/2402.10962v1) -- Persona drift within 8 rounds, mitigation techniques
+6. [A Taxonomy of Persona Collapse in Large Language Models](https://huggingface.co/blog/unmodeled-tyler/persona-collapse-in-llms) -- 30%+ consistency degradation after 8-12 turns
+7. [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172) -- U-shaped attention curve, primacy/recency bias (Liu et al., TACL 2024)
+8. [LLM Reinforcement in Context](https://arxiv.org/html/2511.12782) -- System prompt efficacy decay with context length
+9. [The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models](https://arxiv.org/html/2601.10387v1) -- Model behavior influenced most by recent messages
+10. [Lost in Space: Optimizing Tokens for Grammar-Constrained Decoding](https://arxiv.org/html/2502.14969v1) -- GBNF token mask computation overhead benchmarks
 
-### Practitioner Sources
-15. **Llama 3.2 Benchmark Analysis** — Medium/Towards AGI (2024). [Link](https://medium.com/towards-agi/llama-3-2-benchmark-insights-and-revolutionizing-edge-ai-and-vision-88542fe3dc0d)
-16. **Role-Prompting Research** — PromptHub (2024). [Link](https://www.prompthub.us/blog/role-prompting-does-adding-personas-to-your-prompts-really-make-a-difference)
-17. **Contextual Anchoring** — Lakera Prompt Engineering Guide (2026). [Link](https://www.lakera.ai/blog/prompt-engineering-guide)
-18. **Teaching an LLM to Write Assembly: GBNF-Constrained Generation** — Randall (2025). [Link](https://www.jamesdrandall.com/posts/gbnf-constrained-generation/)
+### Practitioner Sources and Community Findings
+11. [A Guide to Structured Outputs Using Constrained Decoding](https://www.aidancooper.co.uk/constrained-decoding/) -- Constrained decoding especially valuable for small models
+12. [Teaching an LLM to Write Assembly: GBNF-Constrained Generation](https://www.jamesdrandall.com/posts/gbnf-constrained-generation/) -- GBNF as a guardrail eliminating format errors
+13. [The Pink Elephant Problem: Why "Don't Do That" Fails with LLMs](https://eval.16x.engineer/blog/the-pink-elephant-negative-instructions-llms-effectiveness-analysis) -- Negative instruction failure mechanism
+14. [Why Positive Prompts Outperform Negative Ones with LLMs](https://gadlet.com/posts/negative-prompting/) -- Positive vs. negative instruction effectiveness data
+15. [Token Efficiency Traps: Hidden Costs of Few-Shot Prompting](https://medium.com/@johnmunn/token-efficiency-traps-the-hidden-costs-of-zero-shot-vs-few-shot-prompting-8fdc7f2e3d29) -- Diminishing returns after 2-3 examples
+16. [Positional Prompting / Context Framing Strategy](https://prompton.wordpress.com/2025/04/17/positional-prompting-context-framing-strategy/) -- Repeat-instruction anchoring effectiveness
+17. [AI Model Size vs Performance 2026](https://localaimaster.com/blog/ai-model-size-vs-performance-analysis-2025) -- Capability scaling exponents by task type
+18. [Small Language Model Leaderboard](https://awesomeagents.ai/leaderboards/small-language-model-leaderboard/) -- Cross-model benchmark comparison for sub-10B models
 
 ### Cross-Referenced Project Artifacts
-- **BL-008:** On-device LLM SDK maturity research (llama.cpp selected, GBNF support confirmed)
-- **BL-010:** AI Game Master prompt patterns from existing IF products (large-model patterns, Author's Note, GBNF recommendation)
-- **BL-012:** CLI prototype findings (context collapse at ~2,500 tokens, suggestion format 0% compliance, 1,500-token safe zone)
-- **BL-013:** Game design one-pager (60-90 word responses, 15-25 turns/session, sardonic tone, 3 suggestions)
-- **BL-014:** Target device specs & performance budget (1,500 MB iOS memory, ≥4 tok/s decode, ≤3s TTFT)
+- BL-008: On-device LLM SDK maturity research (llama.cpp GBNF grammar support confirmed)
+- BL-010: AI Game Master prompt patterns from existing IF products (Author's Note, per-turn state, GBNF recommendation)
+- BL-012: CLI prototype findings (1,500-token safe zone, context collapse at 2,500 tokens, 0% suggestion compliance)
+- BL-013: Game design one-pager (60-90 words/response, sardonic tone, 3 suggestions, 15-25 turns/session)
+- BL-014: Target device specs (>=4 tok/s decode, <=3s TTFT, 1,500 MB iOS memory budget)
