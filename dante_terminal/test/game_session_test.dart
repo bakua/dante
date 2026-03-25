@@ -401,6 +401,209 @@ void main() {
     });
   });
 
+  group('GameSession.tokenEstimate', () {
+    test('returns integer approximation for non-empty text', () {
+      // 18 chars / 4 = 4.5, ceil → 5
+      expect(GameSession.tokenEstimate('Hello, adventurer!'), 5);
+    });
+
+    test('returns 0 for empty string', () {
+      expect(GameSession.tokenEstimate(''), 0);
+    });
+
+    test('returns 1 for single character', () {
+      expect(GameSession.tokenEstimate('A'), 1);
+    });
+
+    test('scales linearly with text length', () {
+      final short = GameSession.tokenEstimate('Hi');
+      final long = GameSession.tokenEstimate('Hi' * 100);
+      expect(long, greaterThan(short));
+      // 200 chars / 4 = 50 tokens exactly
+      expect(long, 50);
+    });
+  });
+
+  group('GameSession - sliding context window', () {
+    /// Generates a mock response of approximately the given word count.
+    String mockResponseOfLength(int words) {
+      // ~5 chars per word + space ≈ 6 chars/word
+      final narrative = List.generate(words, (i) => 'word${i % 100}').join(' ');
+      return '$narrative\n\n'
+          '> 1. Do something\n'
+          '> 2. Do another thing\n'
+          '> 3. Do a third thing';
+    }
+
+    test('assemblePrompt stays under budget with 10+ turns', () async {
+      // Use kMaxPromptTokens budget (1800 tokens for 2048 context).
+      const budget = 2048;
+      const responseReserve = 248;
+      // prompt budget = budget - responseReserve = 1800
+
+      final responses = List.generate(
+        12,
+        (i) => mockResponseOfLength(20), // ~120 chars each
+      );
+
+      final session = GameSession(
+        systemPrompt: 'You are the Game Master.',
+        generate: multiTurnGenerator(responses),
+        contextBudgetTokens: budget,
+        maxResponseTokens: responseReserve,
+      );
+
+      // Build 12 turns of history.
+      for (var i = 0; i < 12; i++) {
+        await session.submitCommand('command $i').toList();
+      }
+
+      expect(session.history, hasLength(12));
+
+      // Now assemble a prompt for turn 13.
+      final prompt = session.assemblePrompt('new command');
+      final promptTokens = GameSession.tokenEstimate(prompt);
+
+      // Prompt must stay under the prompt budget (context - response reserve).
+      expect(
+        promptTokens,
+        lessThanOrEqualTo(budget - responseReserve),
+        reason: 'Assembled prompt ($promptTokens tokens) must fit within '
+            '${budget - responseReserve} token budget',
+      );
+    });
+
+    test('preserves 2 most recent turns verbatim when compressing', () async {
+      // Tight budget to force compression of older turns.
+      final responses = List.generate(
+        6,
+        (i) => 'Narrative for turn ${i + 1}.\n\n'
+            '> 1. Option A\n> 2. Option B\n> 3. Option C',
+      );
+
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: multiTurnGenerator(responses),
+        contextBudgetTokens: 150,
+        maxResponseTokens: 30,
+      );
+
+      // Build 6 turns of history.
+      for (var i = 0; i < 6; i++) {
+        await session.submitCommand('action $i').toList();
+      }
+
+      final prompt = session.assemblePrompt('next action');
+
+      // The 2 most recent turns (turn 5, turn 6) must appear verbatim.
+      expect(prompt, contains('Player: action 4'));
+      expect(prompt, contains('Player: action 5'));
+      // Their GM responses must also be verbatim.
+      expect(prompt, contains('Narrative for turn 5.'));
+      expect(prompt, contains('Narrative for turn 6.'));
+    });
+
+    test('compresses older turns into Story so far summary', () async {
+      final responses = List.generate(
+        5,
+        (i) => 'Scene description ${i + 1} is here.\n\n'
+            '> 1. Option A\n> 2. Option B\n> 3. Option C',
+      );
+
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: multiTurnGenerator(responses),
+        contextBudgetTokens: 150,
+        maxResponseTokens: 30,
+      );
+
+      // Build 5 turns of history.
+      for (var i = 0; i < 5; i++) {
+        await session.submitCommand('go $i').toList();
+      }
+
+      final prompt = session.assemblePrompt('go 5');
+
+      // Older turns should be compressed into a summary.
+      expect(prompt, contains('Story so far:'));
+      // The summary should contain narrative text from early turns.
+      expect(prompt, contains('Scene description 1'));
+    });
+
+    test('does not compress when all history fits in budget', () async {
+      // Large budget so nothing needs compression.
+      final responses = [
+        'Short.\n\n> 1. A\n> 2. B\n> 3. C',
+        'Brief.\n\n> 1. D\n> 2. E\n> 3. F',
+      ];
+
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: multiTurnGenerator(responses),
+        contextBudgetTokens: 4096,
+        maxResponseTokens: 200,
+      );
+
+      await session.submitCommand('first').toList();
+      await session.submitCommand('second').toList();
+
+      final prompt = session.assemblePrompt('third');
+
+      // Both turns should appear verbatim, no summary needed.
+      expect(prompt, contains('Player: first'));
+      expect(prompt, contains('Player: second'));
+      expect(prompt, isNot(contains('Story so far:')));
+    });
+
+    test('kMaxPromptTokens constant is consistent with 2048 context', () {
+      // kMaxPromptTokens = 2048 - 248 = 1800
+      expect(kMaxPromptTokens, 1800);
+    });
+
+    test('handles large history gracefully (20 turns)', () async {
+      final responses = List.generate(
+        20,
+        (i) => 'The adventurer explores room $i with detailed '
+            'descriptions of ancient stone walls and flickering torches '
+            'that cast long shadows across the mossy floor.\n\n'
+            '> 1. Go deeper\n> 2. Search the room\n> 3. Turn back',
+      );
+
+      // Budget of 500 tokens forces compression with 20 verbose turns
+      // (~60 tokens each = 1200 tokens of history vs ~200 token budget).
+      final session = GameSession(
+        systemPrompt: 'You are a Game Master.',
+        generate: multiTurnGenerator(responses),
+        contextBudgetTokens: 500,
+        maxResponseTokens: 100,
+      );
+
+      // Build 20 turns of history.
+      for (var i = 0; i < 20; i++) {
+        await session.submitCommand('explore room $i').toList();
+      }
+
+      final prompt = session.assemblePrompt('explore room 20');
+      final promptTokens = GameSession.tokenEstimate(prompt);
+      final promptBudget = 500 - 100;
+
+      // Must stay within prompt budget.
+      expect(
+        promptTokens,
+        lessThanOrEqualTo(promptBudget),
+        reason: 'With 20 turns, sliding window must keep prompt under '
+            '$promptBudget tokens (got $promptTokens)',
+      );
+
+      // Must still contain the 2 most recent turns.
+      expect(prompt, contains('Player: explore room 18'));
+      expect(prompt, contains('Player: explore room 19'));
+
+      // Must contain summary of older turns.
+      expect(prompt, contains('Story so far:'));
+    });
+  });
+
   group('GameSession - grammar integration', () {
     test('passes grammarFilePath through to generate function', () async {
       String? receivedGrammarPath;

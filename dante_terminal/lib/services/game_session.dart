@@ -27,6 +27,18 @@ const kOpeningPrompt =
 /// Matches the ~4 chars/token heuristic used in prototype/dante_cli.py.
 const _kCharsPerToken = 4;
 
+/// Default maximum prompt tokens for small on-device models.
+///
+/// For a 2048-token context window, this reserves 248 tokens for generation
+/// output, yielding a 1800-token budget for the assembled prompt (system
+/// prompt + history + current command). Adjust via
+/// [GameSession.contextBudgetTokens] and [GameSession.maxResponseTokens].
+const kMaxPromptTokens = 1800;
+
+/// Number of most-recent turns to always preserve verbatim in the sliding
+/// context window. Older turns are compressed into a narrative summary.
+const kRecentTurnsToKeep = 2;
+
 /// Signature for a text generation function.
 ///
 /// Allows injection of [InferenceService.generate] in production or a mock
@@ -262,18 +274,25 @@ class GameSession {
       historyEntries.add('Player: ${turn.playerCommand}\nGM: ${turn.rawResponse}');
     }
 
-    // Calculate token budget for history.
-    final systemTokens = _estimateTokens(sections.first);
+    // Calculate token budget for history (sliding context window).
+    final systemTokens = tokenEstimate(sections.first);
     final currentTurnText = _turnNumber > 1
         ? '$kStyleAnchor\nPlayer: $currentCommand\nGM:'
         : 'Player: $currentCommand\nGM:';
-    final currentTokens = _estimateTokens(currentTurnText);
-    final historyBudget =
-        contextBudgetTokens - systemTokens - currentTokens - maxResponseTokens;
+    final currentTokens = tokenEstimate(currentTurnText);
+    // Reserve tokens for \n\n separators between sections. Worst case:
+    // system + summary + 2 recent + anchor + current = 6 sections → 5 seps.
+    const separatorOverhead = 5;
+    final historyBudget = contextBudgetTokens -
+        systemTokens -
+        currentTokens -
+        maxResponseTokens -
+        separatorOverhead;
 
-    // Add history from most recent, trimming oldest if over budget.
-    final trimmedHistory = _trimHistory(historyEntries, historyBudget);
-    sections.addAll(trimmedHistory);
+    // Build sliding context window: keep recent turns verbatim,
+    // compress older turns into a narrative summary when over budget.
+    final windowEntries = _buildHistoryWindow(historyEntries, historyBudget);
+    sections.addAll(windowEntries);
 
     // Style anchor after first turn (BL-036 section 2.3: recency-bias).
     if (_turnNumber > 1) {
@@ -336,30 +355,104 @@ class GameSession {
     _turnNumber = 0;
   }
 
+  // ─── Public helpers ──────────────────────────────────────────────────────
+
+  /// Estimate token count for a given text string.
+  ///
+  /// Uses a chars-per-token ratio (~4 chars/token for English text,
+  /// calibrated against typical LLM tokenizers). Returns an integer
+  /// approximation suitable for context budget calculations on
+  /// resource-constrained devices.
+  ///
+  /// Example:
+  /// ```dart
+  /// final tokens = GameSession.tokenEstimate('Hello, adventurer!');
+  /// // tokens ≈ 5
+  /// ```
+  static int tokenEstimate(String text) =>
+      text.isEmpty ? 0 : (text.length / _kCharsPerToken).ceil();
+
   // ─── Private helpers ─────────────────────────────────────────────────────
 
-  /// Estimate token count from text length (~4 chars per token).
-  static int _estimateTokens(String text) =>
-      (text.length / _kCharsPerToken).ceil();
-
-  /// Select history entries that fit within a token budget.
+  /// Build the history section for prompt assembly with a sliding context
+  /// window.
   ///
-  /// Keeps the most recent entries, trimming from the oldest.
-  /// Each entry is a "Player: ...\nGM: ..." pair.
-  List<String> _trimHistory(List<String> entries, int budgetTokens) {
+  /// Always preserves the [kRecentTurnsToKeep] most recent entries verbatim
+  /// (Player/GM pairs). When older entries would exceed the remaining token
+  /// budget, compresses them into a single "Story so far: ..." summary line
+  /// by concatenating their narrative text, truncated to fit.
+  ///
+  /// This prevents context overflow on small on-device models (2048–4096
+  /// tokens) during long play sessions while preserving the most relevant
+  /// recent context for coherent AI responses.
+  List<String> _buildHistoryWindow(
+    List<String> entries,
+    int budgetTokens,
+  ) {
     if (entries.isEmpty || budgetTokens <= 0) return [];
 
-    final result = <String>[];
-    var usedTokens = 0;
+    // Determine how many recent turns to keep verbatim.
+    final recentCount = entries.length < kRecentTurnsToKeep
+        ? entries.length
+        : kRecentTurnsToKeep;
+    final recentEntries = entries.sublist(entries.length - recentCount);
 
-    // Walk backwards from most recent to oldest.
-    for (var i = entries.length - 1; i >= 0; i--) {
-      final entryTokens = _estimateTokens(entries[i]);
-      if (usedTokens + entryTokens > budgetTokens) break;
-      result.insert(0, entries[i]);
-      usedTokens += entryTokens;
+    // Calculate tokens needed for recent entries.
+    var recentTokens = 0;
+    for (final entry in recentEntries) {
+      recentTokens += tokenEstimate(entry);
     }
 
-    return result;
+    // If even recent entries exceed budget, keep only what fits from newest.
+    if (recentTokens > budgetTokens) {
+      final result = <String>[];
+      var used = 0;
+      for (var i = recentEntries.length - 1; i >= 0; i--) {
+        final tokens = tokenEstimate(recentEntries[i]);
+        if (used + tokens > budgetTokens) break;
+        result.insert(0, recentEntries[i]);
+        used += tokens;
+      }
+      return result;
+    }
+
+    // If no older entries exist, return recent.
+    if (entries.length <= recentCount) return recentEntries;
+
+    final olderEntries = entries.sublist(0, entries.length - recentCount);
+
+    // Check if all history fits within budget.
+    var olderTokens = 0;
+    for (final entry in olderEntries) {
+      olderTokens += tokenEstimate(entry);
+    }
+    if (recentTokens + olderTokens <= budgetTokens) return entries;
+
+    // ── Compression: summarize older turns ──
+    final remainingBudget = budgetTokens - recentTokens;
+    if (remainingBudget <= 0) return recentEntries;
+
+    // Extract narrative text from older GameTurn objects.
+    final olderTurnCount = _history.length - recentCount;
+    final narratives = <String>[];
+    for (var i = 0; i < olderTurnCount && i < _history.length; i++) {
+      final narrative = _history[i].narrativeText;
+      if (narrative.isNotEmpty) {
+        narratives.add(narrative);
+      }
+    }
+
+    if (narratives.isEmpty) return recentEntries;
+
+    const summaryPrefix = 'Story so far: ';
+    final fullSummary = '$summaryPrefix${narratives.join(' ')}';
+
+    // Truncate summary to fit remaining token budget.
+    final maxChars = remainingBudget * _kCharsPerToken;
+    final summary = fullSummary.length > maxChars
+        ? fullSummary.substring(0, maxChars)
+        : fullSummary;
+
+    return [summary, ...recentEntries];
   }
 }
