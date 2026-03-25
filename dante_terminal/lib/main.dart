@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'models/adventure_data.dart';
 import 'screens/benchmark_screen.dart';
+import 'screens/model_download_screen.dart';
 import 'services/adventure_loader.dart';
 import 'services/game_assets.dart';
 import 'services/game_session.dart';
@@ -32,7 +33,78 @@ class DanteTerminalApp extends StatelessWidget {
           surface: const Color(0xFF0A0A0A),
         ),
       ),
-      home: const TerminalScreen(),
+      home: const _AppLauncher(),
+    );
+  }
+}
+
+/// Checks for an existing .gguf model file on launch and routes to either
+/// [ModelDownloadScreen] (no model) or [TerminalScreen] (model present).
+///
+/// This is the critical first-run gate described in BL-129: without a model
+/// file the app cannot perform inference, so we must guide the user through
+/// the download before showing the game.
+class _AppLauncher extends StatefulWidget {
+  const _AppLauncher();
+
+  @override
+  State<_AppLauncher> createState() => _AppLauncherState();
+}
+
+class _AppLauncherState extends State<_AppLauncher> {
+  bool _checking = true;
+  bool _modelFound = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkForModel();
+  }
+
+  Future<void> _checkForModel() async {
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final entries = docsDir.listSync();
+      // Mirror InferenceService._findModelInDocuments: any .gguf file qualifies
+      final found = entries.any(
+        (e) => e is File && e.path.endsWith('.gguf'),
+      );
+      if (mounted) setState(() { _modelFound = found; _checking = false; });
+    } catch (_) {
+      // path_provider may fail in test harness — assume no model
+      if (mounted) setState(() { _modelFound = false; _checking = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checking) {
+      // Brief splash while checking filesystem (near-instant on device)
+      return const Scaffold(
+        backgroundColor: Color(0xFF0A0A0A),
+        body: Center(
+          child: Text(
+            'DANTE TERMINAL',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00FF41),
+              letterSpacing: 4,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_modelFound) {
+      return const TerminalScreen();
+    }
+
+    return ModelDownloadScreen(
+      onDownloadComplete: () {
+        if (mounted) setState(() => _modelFound = true);
+      },
     );
   }
 }
