@@ -1,5 +1,7 @@
 # dante_terminal
 
+[![Mobile CI](https://github.com/bakua/dante/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/bakua/dante/actions/workflows/mobile-ci.yml)
+
 DANTE TERMINAL - AI-powered text adventure game
 
 ## Getting Started
