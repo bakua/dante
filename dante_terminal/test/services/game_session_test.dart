@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dante_terminal/models/adventure_data.dart';
 import 'package:dante_terminal/services/game_session.dart';
 
 // ---------------------------------------------------------------------------
@@ -454,6 +455,343 @@ void main() {
 
       // savedAt is a parseable ISO 8601 timestamp.
       expect(() => DateTime.parse(data['savedAt'] as String), returnsNormally);
+    });
+  });
+
+  // =========================================================================
+  // Area 5: Location context injection (BL-162)
+  // =========================================================================
+  group('Location context injection', () {
+    /// Helper: create a Location for testing.
+    Location makeLocation({
+      String id = 'antechamber',
+      String name = 'The Antechamber',
+      String description = 'Collapsed stairway, rubble blocks exit. '
+          'Floor mosaic: open book in chains. Water seeps through debris.',
+      List<Exit>? exits,
+      List<String> itemIds = const [],
+      List<String> npcIds = const [],
+    }) {
+      return Location(
+        id: id,
+        name: name,
+        description: description,
+        keywords: const ['test'],
+        exits: exits ??
+            [
+              const Exit(direction: 'north', targetLocationId: 'main_hall'),
+            ],
+        itemIds: itemIds,
+        npcIds: npcIds,
+      );
+    }
+
+    test('setLocation updates currentLocation state', () {
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: _mockGen(''),
+      );
+
+      expect(session.currentLocation, isNull);
+
+      final loc = makeLocation();
+      session.setLocation(loc);
+
+      expect(session.currentLocation, same(loc));
+    });
+
+    test('assemblePrompt includes CURRENT LOCATION block when location is set',
+        () {
+      final session = GameSession(
+        systemPrompt: 'You are the Game Master.',
+        generate: _mockGen(''),
+      );
+
+      final loc = makeLocation();
+      session.setLocation(loc);
+
+      final prompt = session.assemblePrompt('look around');
+
+      // Location context block is present.
+      expect(prompt, contains('CURRENT LOCATION: The Antechamber.'));
+      // Description content is present.
+      expect(prompt, contains('Collapsed stairway'));
+      // Exits are listed.
+      expect(prompt, contains('Exits: north.'));
+      // Block appears between system prompt and player command.
+      final sysIdx = prompt.indexOf('System:');
+      final locIdx = prompt.indexOf('CURRENT LOCATION:');
+      final playerIdx = prompt.indexOf('Player:');
+      expect(locIdx, greaterThan(sysIdx));
+      expect(locIdx, lessThan(playerIdx));
+    });
+
+    test('assemblePrompt omits location block when no location is set', () {
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: _mockGen(''),
+      );
+
+      final prompt = session.assemblePrompt('look around');
+
+      expect(prompt, isNot(contains('CURRENT LOCATION:')));
+    });
+
+    test('location context updates when setLocation called with different location',
+        () {
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: _mockGen(''),
+      );
+
+      // Set first location.
+      session.setLocation(makeLocation(
+        id: 'antechamber',
+        name: 'The Antechamber',
+        description: 'Cold stone room.',
+      ));
+
+      final prompt1 = session.assemblePrompt('look');
+      expect(prompt1, contains('CURRENT LOCATION: The Antechamber.'));
+      expect(prompt1, contains('Cold stone room.'));
+
+      // Change location.
+      session.setLocation(makeLocation(
+        id: 'main_hall',
+        name: 'The Main Hall',
+        description: 'Vaulted corridor with fungus.',
+        exits: [
+          const Exit(direction: 'south', targetLocationId: 'antechamber'),
+          const Exit(direction: 'east', targetLocationId: 'east_wing'),
+        ],
+      ));
+
+      final prompt2 = session.assemblePrompt('look');
+      expect(prompt2, contains('CURRENT LOCATION: The Main Hall.'));
+      expect(prompt2, contains('Vaulted corridor with fungus.'));
+      expect(prompt2, contains('Exits: south, east.'));
+      // Old location no longer present.
+      expect(prompt2, isNot(contains('The Antechamber')));
+    });
+
+    test('location context includes items and NPCs when present', () {
+      final session = GameSession(
+        systemPrompt: 'GM.',
+        generate: _mockGen(''),
+      );
+
+      session.setLocation(makeLocation(
+        name: 'The Circulation Desk',
+        description: 'Hexagonal chamber.',
+        itemIds: ['brass_key', 'oil_lamp'],
+        npcIds: ['the_cataloger'],
+      ));
+
+      final prompt = session.assemblePrompt('look');
+      expect(prompt, contains('Items: brass_key, oil_lamp.'));
+      expect(prompt, contains('NPCs: the_cataloger.'));
+    });
+
+    test('buildLocationContext fits within 80 tokens for compact locations', () {
+      // A typical Sunken Archive location with moderate content.
+      final loc = makeLocation(
+        name: 'The Antechamber',
+        description: 'Collapsed stairway, rubble blocks exit. '
+            'Floor mosaic: open book in chains. Water seeps through debris.',
+        exits: [
+          const Exit(direction: 'north', targetLocationId: 'main_hall'),
+          const Exit(
+            direction: 'up',
+            targetLocationId: 'surface',
+            blocked: true,
+          ),
+        ],
+      );
+
+      final context = GameSession.buildLocationContext(loc);
+      final tokens = GameSession.tokenEstimate(context);
+
+      expect(
+        tokens,
+        lessThanOrEqualTo(kLocationContextMaxTokens),
+        reason: 'Location context ($tokens tokens) must fit within '
+            '$kLocationContextMaxTokens token budget',
+      );
+    });
+
+    test('buildLocationContext truncates long descriptions to fit 80 tokens',
+        () {
+      // Deliberately long description that would exceed 80 tokens.
+      final loc = makeLocation(
+        name: 'The Restricted Section',
+        description:
+            'Carved from bedrock. Books chained to shelves, spines inward. '
+            'Air thick and warm. Darkness unnaturally dense. Low hum from '
+            'below. One scorched shelf — Codex Umbra original location. '
+            'The Warden manifests near spiral staircase.',
+        exits: [
+          const Exit(direction: 'south', targetLocationId: 'circulation_desk'),
+          const Exit(
+            direction: 'down',
+            targetLocationId: 'vault_of_the_codex',
+            blocked: true,
+          ),
+        ],
+        npcIds: ['the_warden'],
+      );
+
+      final context = GameSession.buildLocationContext(loc);
+      final tokens = GameSession.tokenEstimate(context);
+
+      expect(
+        tokens,
+        lessThanOrEqualTo(kLocationContextMaxTokens),
+        reason: 'Truncated context ($tokens tokens) must fit within '
+            '$kLocationContextMaxTokens token budget',
+      );
+      // Still starts with the location header.
+      expect(context, startsWith('CURRENT LOCATION: The Restricted Section.'));
+      // Still has structured data.
+      expect(context, contains('Exits:'));
+    });
+
+    test('all sunken_archive locations produce ≤80 token context blocks', () {
+      // Reproduce all 9 Sunken Archive locations from the adventure JSON
+      // to verify the 80-token budget holds for every room.
+      final locations = <Location>[
+        const Location(
+          id: 'antechamber',
+          name: 'The Antechamber',
+          description:
+              'Collapsed stairway, rubble blocks exit upward. Floor mosaic: '
+              'open book in chains. Water seeps through debris. One corridor '
+              'leads north to Main Hall. The Codex Umbra can unseal the '
+              'stairway exit.',
+          keywords: ['antechamber'],
+          exits: [Exit(direction: 'north', targetLocationId: 'main_hall'),
+                  Exit(direction: 'up', targetLocationId: 'surface', blocked: true)],
+        ),
+        const Location(
+          id: 'east_wing',
+          name: 'The East Wing',
+          description:
+              'Ankle-deep dark water. Leaning bookshelves, waterlogged books. '
+              'Collapsed reading desk with metallic glint underneath. Water '
+              'flows north. One readable shelf mentions the Cipher for '
+              'Restricted texts. Exits: west to Main Hall, north to Flooded Passage.',
+          keywords: ['east wing'],
+          exits: [Exit(direction: 'west', targetLocationId: 'main_hall'),
+                  Exit(direction: 'north', targetLocationId: 'flooded_passage')],
+          itemIds: ['brass_key'],
+        ),
+        const Location(
+          id: 'main_hall',
+          name: 'The Main Hall',
+          description:
+              'Central vaulted corridor. Bioluminescent fungus on ceiling '
+              'casts blue-green glow, reacts to loud sounds. Floor mosaic '
+              'shows robed figures carrying books into a spiral. Water '
+              'stream flows south. Exits: south, east, west, north.',
+          keywords: ['main hall'],
+          exits: [Exit(direction: 'south', targetLocationId: 'antechamber'),
+                  Exit(direction: 'east', targetLocationId: 'east_wing'),
+                  Exit(direction: 'west', targetLocationId: 'west_wing'),
+                  Exit(direction: 'north', targetLocationId: 'circulation_desk')],
+        ),
+        const Location(
+          id: 'west_wing',
+          name: 'The West Wing',
+          description:
+              'Bone-dry, warm air. Glass display cases, most shattered. '
+              'One intact case with wax seal holds the Archivist\'s Journal. '
+              'Cabinet drawer contains glass vial of solvent. Ceiling timbers '
+              'creak. Exit: east to Main Hall.',
+          keywords: ['west wing'],
+          exits: [Exit(direction: 'east', targetLocationId: 'main_hall')],
+          itemIds: ['archivists_journal', 'glass_vial_solvent'],
+        ),
+        const Location(
+          id: 'flooded_passage',
+          name: 'The Flooded Passage',
+          description:
+              'Waist-deep black water, narrow walls, low ceiling. Sound '
+              'distorts. Waterproof satchel on peg above water. Submerged '
+              'shelf holds sealed lamp oil. Visible high-water mark above '
+              'current level. Exits: south to East Wing, west to Circulation Desk.',
+          keywords: ['flooded passage'],
+          exits: [Exit(direction: 'south', targetLocationId: 'east_wing'),
+                  Exit(direction: 'west', targetLocationId: 'circulation_desk')],
+          itemIds: ['waterproof_satchel'],
+        ),
+        const Location(
+          id: 'circulation_desk',
+          name: 'The Circulation Desk',
+          description:
+              'Hexagonal chamber with massive stone desk. Chained leather '
+              'ledger. Polished brass bell summons the Cataloger. Iron gate '
+              'north to Restricted Section needs brass key. Exits: south, '
+              'east, west, north (locked).',
+          keywords: ['circulation desk'],
+          exits: [Exit(direction: 'south', targetLocationId: 'main_hall'),
+                  Exit(direction: 'east', targetLocationId: 'flooded_passage'),
+                  Exit(direction: 'west', targetLocationId: 'reading_room'),
+                  Exit(direction: 'north', targetLocationId: 'restricted_section', blocked: true)],
+          npcIds: ['the_cataloger'],
+        ),
+        const Location(
+          id: 'reading_room',
+          name: 'The Reading Room',
+          description:
+              'Large domed chamber. Star map mural — constellations subtly '
+              'wrong. Collapsed tables and chairs. Cold stone fire pit with '
+              'oversized scorch marks forming Archive seal. Cipher Wheel '
+              'hidden in hollowed book near fire pit. Exits: east, south.',
+          keywords: ['reading room'],
+          exits: [Exit(direction: 'east', targetLocationId: 'circulation_desk'),
+                  Exit(direction: 'south', targetLocationId: 'west_wing')],
+          itemIds: ['cipher_wheel'],
+          npcIds: ['maren'],
+        ),
+        const Location(
+          id: 'restricted_section',
+          name: 'The Restricted Section',
+          description:
+              'Carved from bedrock. Books chained to shelves, spines inward. '
+              'Air thick and warm. Darkness unnaturally dense. Low hum from '
+              'below. One scorched shelf — Codex Umbra\'s original location. '
+              'The Warden manifests near spiral staircase. Exits: south, '
+              'down (after Warden).',
+          keywords: ['restricted section'],
+          exits: [Exit(direction: 'south', targetLocationId: 'circulation_desk'),
+                  Exit(direction: 'down', targetLocationId: 'vault_of_the_codex', blocked: true)],
+          npcIds: ['the_warden'],
+        ),
+        const Location(
+          id: 'vault_of_the_codex',
+          name: 'The Vault of the Codex',
+          description:
+              'Circular obsidian chamber. Stone pedestal holds Codex Umbra — '
+              'black leather book absorbing light. Five-disc combination lock '
+              'with star-map symbols. Taking Codex triggers flooding. '
+              'Pedestal engraving matches Antechamber seal. Exit: up to '
+              'Restricted Section.',
+          keywords: ['vault'],
+          exits: [Exit(direction: 'up', targetLocationId: 'restricted_section')],
+        ),
+      ];
+
+      for (final loc in locations) {
+        final context = GameSession.buildLocationContext(loc);
+        final tokens = GameSession.tokenEstimate(context);
+
+        expect(
+          tokens,
+          lessThanOrEqualTo(kLocationContextMaxTokens),
+          reason: '${loc.name} context ($tokens tokens, ${context.length} chars) '
+              'exceeds $kLocationContextMaxTokens token budget.\n'
+              'Content: $context',
+        );
+      }
     });
   });
 }

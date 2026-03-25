@@ -22,6 +22,8 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import '../models/adventure_data.dart';
+
 /// Style anchor injected near the generation point to exploit recency bias
 /// and maintain persona/format compliance (BL-036 section 2.3).
 const kStyleAnchor =
@@ -46,6 +48,13 @@ const kMaxPromptTokens = 1800;
 /// Number of most-recent turns to always preserve verbatim in the sliding
 /// context window. Older turns are compressed into a narrative summary.
 const kRecentTurnsToKeep = 2;
+
+/// Maximum token budget for the location context block injected into prompts.
+///
+/// Designed to accommodate any Sunken Archive location's name, description,
+/// exits, items, and NPCs in a single compact line. Descriptions exceeding
+/// the budget are truncated at the nearest sentence boundary.
+const kLocationContextMaxTokens = 80;
 
 /// Signature for a text generation function.
 ///
@@ -195,6 +204,7 @@ class GameSession {
   final GenerateFunction _generate;
   final List<GameTurn> _history = [];
   int _turnNumber = 0;
+  Location? _currentLocation;
 
   /// Creates a new game session.
   ///
@@ -216,6 +226,70 @@ class GameSession {
 
   /// Current turn number (0 before any turns).
   int get turnNumber => _turnNumber;
+
+  /// The currently set location, or null if no location has been set.
+  Location? get currentLocation => _currentLocation;
+
+  /// Set the current location for prompt context injection.
+  ///
+  /// When set, [assemblePrompt] injects a compact `CURRENT LOCATION:` block
+  /// between the system prompt and conversation history, grounding the model's
+  /// responses in the actual room data (name, description, exits, items, NPCs).
+  ///
+  /// Call this when the player moves to a new location or at adventure start.
+  void setLocation(Location location) {
+    _currentLocation = location;
+  }
+
+  /// Build a compact location context block for prompt injection.
+  ///
+  /// Format: `CURRENT LOCATION: [name]. [description]. Exits: [list].
+  /// Items: [list]. NPCs: [list].`
+  ///
+  /// Enforces [kLocationContextMaxTokens] budget by truncating the description
+  /// at the nearest sentence boundary when the full block would exceed it.
+  ///
+  /// Returns an empty string if [location] is null.
+  static String buildLocationContext(Location location) {
+    final prefix = 'CURRENT LOCATION: ${location.name}.';
+
+    // Build structured suffix (exits, items, NPCs).
+    final suffixParts = <String>[];
+    final exitDirs = location.exits.map((e) => e.direction).join(', ');
+    if (exitDirs.isNotEmpty) suffixParts.add('Exits: $exitDirs.');
+    if (location.itemIds.isNotEmpty) {
+      suffixParts.add('Items: ${location.itemIds.join(", ")}.');
+    }
+    if (location.npcIds.isNotEmpty) {
+      suffixParts.add('NPCs: ${location.npcIds.join(", ")}.');
+    }
+    final suffix = suffixParts.isNotEmpty ? ' ${suffixParts.join(" ")}' : '';
+
+    // Calculate remaining token budget for description.
+    final prefixTokens = tokenEstimate(prefix);
+    final suffixTokens = tokenEstimate(suffix);
+    final descBudget = kLocationContextMaxTokens - prefixTokens - suffixTokens;
+
+    var desc = location.description;
+    if (descBudget <= 0) {
+      // No room for description — return prefix + suffix only.
+      return '$prefix$suffix';
+    }
+
+    if (tokenEstimate(desc) > descBudget) {
+      // Truncate at nearest sentence boundary to fit budget.
+      final maxChars = descBudget * _kCharsPerToken;
+      if (desc.length > maxChars) {
+        desc = desc.substring(0, maxChars);
+        final lastPeriod = desc.lastIndexOf('.');
+        if (lastPeriod > maxChars ~/ 2) {
+          desc = desc.substring(0, lastPeriod + 1);
+        }
+      }
+    }
+
+    return '$prefix $desc$suffix';
+  }
 
   /// Submit a player command and receive a stream of [GameTurn] updates.
   ///
@@ -282,6 +356,8 @@ class GameSession {
   /// ```
   /// System: [system prompt]
   ///
+  /// CURRENT LOCATION: [name]. [description]. Exits: [...]. Items: [...]. NPCs: [...].
+  ///
   /// Player: [past command]
   /// GM: [past response]
   ///
@@ -297,6 +373,12 @@ class GameSession {
     // System prompt always first.
     sections.add('System: $systemPrompt');
 
+    // Location context block (BL-162): inject between system prompt and
+    // history to ground model responses in the current room's actual data.
+    if (_currentLocation != null) {
+      sections.add(buildLocationContext(_currentLocation!));
+    }
+
     // Build history entries as Player/GM pairs.
     final historyEntries = <String>[];
     for (final turn in _history) {
@@ -305,15 +387,19 @@ class GameSession {
 
     // Calculate token budget for history (sliding context window).
     final systemTokens = tokenEstimate(sections.first);
+    final locationTokens = _currentLocation != null
+        ? tokenEstimate(buildLocationContext(_currentLocation!))
+        : 0;
     final currentTurnText = _turnNumber > 1
         ? '$kStyleAnchor\nPlayer: $currentCommand\nGM:'
         : 'Player: $currentCommand\nGM:';
     final currentTokens = tokenEstimate(currentTurnText);
     // Reserve tokens for \n\n separators between sections. Worst case:
-    // system + summary + 2 recent + anchor + current = 6 sections → 5 seps.
-    const separatorOverhead = 5;
+    // system + location + summary + 2 recent + anchor + current = 7 → 6 seps.
+    const separatorOverhead = 6;
     final historyBudget = contextBudgetTokens -
         systemTokens -
+        locationTokens -
         currentTokens -
         maxResponseTokens -
         separatorOverhead;
