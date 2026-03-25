@@ -65,6 +65,9 @@ class _TerminalScreenState extends State<TerminalScreen> {
   static const _metricsColor = Color(0xFF00886A);
   static const _suggestionColor = Color(0xFF00CC55);
 
+  /// Typewriter pacing: milliseconds between each displayed character.
+  static const _typewriterDelayMs = 20;
+
   @override
   void initState() {
     super.initState();
@@ -169,7 +172,7 @@ class _TerminalScreenState extends State<TerminalScreen> {
     return buffer.toString();
   }
 
-  /// Generate the opening scene via [GameSession] on model load.
+  /// Generate the opening scene via [GameSession] with typewriter animation.
   Future<void> _generateOpeningScene() async {
     setState(() {
       _isGenerating = true;
@@ -183,30 +186,17 @@ class _TerminalScreenState extends State<TerminalScreen> {
               'Describe what the player sees and suggest 3 actions.'
           : kOpeningPrompt;
 
-      final stopwatch = Stopwatch()..start();
-      int? ttftMs;
-      int tokenCount = 0;
-      GameTurn? lastTurn;
+      final result = await _typewriteGameResponse(
+        _gameSession!.submitCommand(openingCommand),
+      );
 
-      await for (final turn in _gameSession!.submitCommand(openingCommand)) {
-        lastTurn = turn;
-        if (!turn.isComplete) {
-          ttftMs ??= stopwatch.elapsedMilliseconds;
-          tokenCount++;
-        }
-      }
-
-      stopwatch.stop();
-
-      if (lastTurn != null && lastTurn.isComplete) {
-        _addLine(lastTurn.narrativeText);
-        _displaySuggestions(lastTurn.suggestions);
-
+      if (result.turn != null && result.turn!.isComplete) {
+        _displaySuggestions(result.turn!.suggestions);
         _captureMetrics(
-          ttftMs: ttftMs,
-          tokenCount: tokenCount,
-          totalTimeMs: stopwatch.elapsedMilliseconds,
-          rawResponse: lastTurn.rawResponse,
+          ttftMs: result.ttftMs,
+          tokenCount: result.tokenCount,
+          totalTimeMs: result.totalTimeMs,
+          rawResponse: result.turn!.rawResponse,
         );
       }
     } catch (e) {
@@ -263,6 +253,19 @@ class _TerminalScreenState extends State<TerminalScreen> {
     }
   }
 
+  /// Scroll the terminal output to the bottom after the next frame renders.
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   void _addLine(
     String text, {
     bool isHeader = false,
@@ -277,16 +280,153 @@ class _TerminalScreenState extends State<TerminalScreen> {
         isSuggestion: isSuggestion,
       ));
     });
-    // Scroll to bottom after frame renders
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeOut,
-        );
+    _scrollToBottom();
+  }
+
+  /// Stream a [GameSession] response with concurrent typewriter animation.
+  ///
+  /// A producer task collects tokens from the stream at inference speed while
+  /// a consumer task displays characters one-by-one at [_typewriterDelayMs]
+  /// pacing. This allows the LLM to generate at full speed while the terminal
+  /// reveals text with an authentic typewriter feel.
+  Future<({GameTurn? turn, int tokenCount, int? ttftMs, int totalTimeMs})>
+      _typewriteGameResponse(Stream<GameTurn> turns) async {
+    final pendingChars = <String>[];
+    var producerDone = false;
+    GameTurn? completeTurn;
+    int tokenCount = 0;
+    int? ttftMs;
+    int lastNarrLen = 0;
+    final stopwatch = Stopwatch()..start();
+    Object? producerError;
+
+    // Add empty line that will be progressively filled
+    final lineIdx = _lines.length;
+    setState(() => _lines.add(_TerminalLine('')));
+
+    // Producer: collect tokens from the GameSession stream at full speed
+    final producerFuture = () async {
+      try {
+        await for (final turn in turns) {
+          final narr = turn.narrativeText;
+          if (narr.length > lastNarrLen) {
+            pendingChars.addAll(narr.substring(lastNarrLen).split(''));
+            lastNarrLen = narr.length;
+          }
+          if (turn.isComplete) {
+            completeTurn = turn;
+          } else {
+            ttftMs ??= stopwatch.elapsedMilliseconds;
+            tokenCount++;
+          }
+        }
+      } catch (e) {
+        producerError = e;
       }
-    });
+      stopwatch.stop();
+      producerDone = true;
+    }();
+
+    // Consumer: reveal characters at typewriter pace
+    final displayBuf = StringBuffer();
+    while (!producerDone || pendingChars.isNotEmpty) {
+      if (!mounted || producerError != null) break;
+      if (pendingChars.isNotEmpty) {
+        displayBuf.write(pendingChars.removeAt(0));
+        setState(() {
+          _lines[lineIdx] = _TerminalLine(displayBuf.toString());
+        });
+        _scrollToBottom();
+        await Future.delayed(const Duration(milliseconds: _typewriterDelayMs));
+      } else {
+        // Yield to event loop while waiting for more characters
+        await Future.delayed(const Duration(milliseconds: 5));
+      }
+    }
+
+    await producerFuture;
+    if (producerError != null) throw producerError!;
+
+    return (
+      turn: completeTurn,
+      tokenCount: tokenCount,
+      ttftMs: ttftMs,
+      totalTimeMs: stopwatch.elapsedMilliseconds,
+    );
+  }
+
+  /// Stream raw inference tokens with typewriter animation (fallback path).
+  ///
+  /// Used when no [GameSession] is available — renders raw
+  /// [InferenceService.generate] output with the same typewriter pacing.
+  Future<
+      ({
+        String response,
+        int tokenCount,
+        int? ttftMs,
+        int totalTimeMs,
+        double? peakMem,
+      })> _typewriteRawResponse(Stream<String> tokenStream) async {
+    final pendingChars = <String>[];
+    var producerDone = false;
+    int tokenCount = 0;
+    int? ttftMs;
+    double? peakMem = getCurrentMemoryMB();
+    final stopwatch = Stopwatch()..start();
+    Object? producerError;
+
+    // Add empty line for streaming text
+    final lineIdx = _lines.length;
+    setState(() => _lines.add(_TerminalLine('')));
+
+    // Producer: collect raw tokens at inference speed
+    final producerFuture = () async {
+      try {
+        await for (final token in tokenStream) {
+          ttftMs ??= stopwatch.elapsedMilliseconds;
+          pendingChars.addAll(token.split(''));
+          tokenCount++;
+          if (tokenCount % 20 == 0) {
+            final mem = getCurrentMemoryMB();
+            final peak = peakMem;
+            if (mem != null && (peak == null || mem > peak)) {
+              peakMem = mem;
+            }
+          }
+        }
+      } catch (e) {
+        producerError = e;
+      }
+      stopwatch.stop();
+      producerDone = true;
+    }();
+
+    // Consumer: display at typewriter pace
+    final displayBuf = StringBuffer();
+    while (!producerDone || pendingChars.isNotEmpty) {
+      if (!mounted || producerError != null) break;
+      if (pendingChars.isNotEmpty) {
+        displayBuf.write(pendingChars.removeAt(0));
+        setState(() {
+          _lines[lineIdx] = _TerminalLine(displayBuf.toString());
+        });
+        _scrollToBottom();
+        await Future.delayed(const Duration(milliseconds: _typewriterDelayMs));
+      } else {
+        await Future.delayed(const Duration(milliseconds: 5));
+      }
+    }
+
+    await producerFuture;
+    if (producerError != null) throw producerError!;
+
+    return (
+      response: displayBuf.toString(),
+      tokenCount: tokenCount,
+      ttftMs: ttftMs,
+      totalTimeMs: stopwatch.elapsedMilliseconds,
+      peakMem: peakMem,
+    );
   }
 
   Future<void> _onSubmit() async {
@@ -320,77 +460,41 @@ class _TerminalScreenState extends State<TerminalScreen> {
 
     try {
       if (_gameSession != null) {
-        // ── GameSession path: full prompt assembly + suggestion parsing ──
-        final stopwatch = Stopwatch()..start();
-        int? ttftMs;
-        int tokenCount = 0;
-        GameTurn? lastTurn;
+        // ── GameSession path: typewriter-streamed with suggestion parsing ──
+        final result = await _typewriteGameResponse(
+          _gameSession!.submitCommand(command),
+        );
 
-        await for (final turn in _gameSession!.submitCommand(command)) {
-          lastTurn = turn;
-          if (!turn.isComplete) {
-            ttftMs ??= stopwatch.elapsedMilliseconds;
-            tokenCount++;
-          }
-        }
-
-        stopwatch.stop();
-
-        if (lastTurn != null && lastTurn.isComplete) {
-          // Display narrative text
-          _addLine(lastTurn.narrativeText);
-
-          // Display parsed suggestions
-          _displaySuggestions(lastTurn.suggestions);
-
-          // Capture and display performance metrics
+        if (result.turn != null && result.turn!.isComplete) {
+          _displaySuggestions(result.turn!.suggestions);
           _captureMetrics(
-            ttftMs: ttftMs,
-            tokenCount: tokenCount,
-            totalTimeMs: stopwatch.elapsedMilliseconds,
-            rawResponse: lastTurn.rawResponse,
+            ttftMs: result.ttftMs,
+            tokenCount: result.tokenCount,
+            totalTimeMs: result.totalTimeMs,
+            rawResponse: result.turn!.rawResponse,
           );
         }
       } else {
-        // ── Fallback: raw InferenceService (no GameSession available) ──
-        final stopwatch = Stopwatch()..start();
-        int? ttftMs;
-        int tokenCount = 0;
-        final responseBuffer = StringBuffer();
-        double? peakMem = getCurrentMemoryMB();
-
-        await for (final token
-            in _inference.generate(command, maxTokens: 150)) {
-          ttftMs ??= stopwatch.elapsedMilliseconds;
-          responseBuffer.write(token);
-          tokenCount++;
-
-          if (tokenCount % 20 == 0) {
-            final mem = getCurrentMemoryMB();
-            if (mem != null && (peakMem == null || mem > peakMem)) {
-              peakMem = mem;
-            }
-          }
-        }
-
-        stopwatch.stop();
-        _addLine(responseBuffer.toString());
+        // ── Fallback: raw InferenceService with typewriter animation ──
+        final result = await _typewriteRawResponse(
+          _inference.generate(command, maxTokens: 150),
+        );
 
         final metrics = InferenceMetrics(
           modelName:
               _inference.loadedModelPath?.split('/').last ?? 'unknown',
-          ttftMs: ttftMs ?? stopwatch.elapsedMilliseconds,
-          tokenCount: tokenCount,
-          totalTimeMs: stopwatch.elapsedMilliseconds,
-          peakMemoryMB: peakMem,
-          responseText: responseBuffer.toString(),
+          ttftMs: result.ttftMs ?? result.totalTimeMs,
+          tokenCount: result.tokenCount,
+          totalTimeMs: result.totalTimeMs,
+          peakMemoryMB: result.peakMem,
+          responseText: result.response,
         );
 
         _lastMetrics = metrics;
         _addLine(
           '[PERF] TTFT: ${metrics.ttftSeconds.toStringAsFixed(2)}s | '
           '${metrics.tokensPerSecond.toStringAsFixed(1)} tok/s | '
-          '$tokenCount tokens in ${stopwatch.elapsedMilliseconds}ms',
+          '${result.tokenCount} tokens in ${result.totalTimeMs}ms',
           isMetric: true,
         );
       }
