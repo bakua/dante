@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DANTE TERMINAL — AI Text Adventure</title>
+  <meta name="description" content="An AI-powered text adventure game that runs entirely offline on your phone. Classic interactive fiction meets on-device AI.">
+  <meta name="theme-color" content="#0A0A0A">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="DANTE TERMINAL — AI Text Adventure">
+  <meta property="og:description" content="An AI-powered text adventure game that runs entirely offline. Classic interactive fiction meets on-device AI.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+      <h1 class="hero__title">DANTE TERMINAL</h1>
+      <p class="hero__version">v0.1 // PRE-LAUNCH</p>
+
+      <div class="hero__prompt">
+        <span class="prompt-line">
+          <span class="prompt-symbol">&gt; </span><span class="typewriter" data-typewriter="BOOT SEQUENCE INITIATED..." data-speed="50"></span>
+        </span>
+        <span class="prompt-line">
+          <span class="prompt-symbol">&gt; </span><span class="typewriter" data-typewriter="AI GAME MASTER: ONLINE" data-speed="45"></span>
+        </span>
+        <span class="prompt-line">
+          <span class="prompt-symbol">&gt; </span><span class="typewriter" data-typewriter="NO INTERNET REQUIRED. YOUR ADVENTURE RUNS ON-DEVICE." data-speed="35"></span>
+        </span>
+        <span id="end-cursor" class="cursor" style="display:none;"></span>
+      </div>
+    </header>
+
+    <hr class="divider">
+
+    <!-- ===== VALUE PROP ===== -->
+    <section class="terminal-box">
+      <p>
+        <strong>DANTE TERMINAL</strong> is a mobile text adventure where an on-device AI
+        serves as your Game Master. No cloud. No internet. No subscriptions.
+        Just you, a retro terminal, and an AI that understands whatever you type.
+      </p>
+      <br>
+      <p>
+        Think <em>Zork</em> meets modern AI &mdash; running entirely in your pocket.
+      </p>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="terminal-box">
+      <ul class="features">
+        <li>100% offline &mdash; AI runs on your device after a one-time model download</li>
+        <li>Type anything &mdash; no fixed verb lists, the AI understands natural language</li>
+        <li>Retro terminal UI with typewriter text, scanlines, and that green glow</li>
+        <li>Handcrafted adventures with puzzles, NPCs, and multiple endings</li>
+        <li>No ads. No tracking. No cloud dependency. Your game, your device.</li>
+      </ul>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ===== DEMO PREVIEW ===== -->
+    <section class="terminal-box" style="font-size:0.85rem;">
+      <p style="color:var(--green-dim);margin-bottom:0.5rem;">// SAMPLE SESSION</p>
+      <p><span class="prompt-symbol">&gt; </span>look around</p>
+      <p style="margin:0.5rem 0;opacity:0.9;">
+        You stand in a vaulted antechamber. Water drips from cracks in the stone
+        ceiling, pooling around the bases of collapsed bookshelves. A faint amber
+        light flickers from an oil lamp mounted on the far wall. Three corridors
+        branch ahead &mdash; east, west, and a narrow staircase descending into darkness.
+      </p>
+      <p style="color:var(--amber);font-size:0.8rem;">
+        1. Take the oil lamp from the wall<br>
+        2. Head east toward the flickering light<br>
+        3. Descend the narrow staircase
+      </p>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ===== EMAIL SIGNUP ===== -->
+    <section class="signup" id="waitlist">
+      <p class="signup__label">// JOIN THE WAITLIST &mdash; GET NOTIFIED AT LAUNCH</p>
+
+      <form
+        id="signup-form"
+        class="signup__form"
+        action="https://buttondown.com/api/emails/embed-subscribe/dante-terminal"
+        method="post"
+        target="_blank"
+      >
+        <input
+          type="email"
+          name="email"
+          class="signup__input"
+          placeholder="operator@terminal.local"
+          required
+          aria-label="Email address for waitlist"
+        >
+        <button type="submit" class="signup__btn">ENLIST</button>
+      </form>
+
+      <div id="signup-success" class="signup__success">
+        &gt; TRANSMISSION RECEIVED. YOU WILL BE CONTACTED.<span class="cursor"></span>
+      </div>
+
+      <p class="signup__note">Free. No spam. Unsubscribe anytime. Powered by Buttondown.</p>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ===== STORE BADGES ===== -->
+    <section>
+      <p style="text-align:center;font-size:0.8rem;color:var(--green-dim);margin-bottom:1rem;">
+        // COMING SOON TO
+      </p>
+      <div class="stores">
+        <a href="#" class="store-badge" aria-label="App Store (coming soon)">
+          [ APPLE APP STORE ]
+        </a>
+        <a href="#" class="store-badge" aria-label="Google Play (coming soon)">
+          [ GOOGLE PLAY ]
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <p>DANTE TERMINAL &copy; 2026 // BUILT BY HUMANS + AI</p>
+      <p style="margin-top:0.3rem;">
+        <a href="https://github.com/jakubtakac/dante-terminal">SOURCE</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

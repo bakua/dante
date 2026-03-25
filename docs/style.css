@@ -1,0 +1,392 @@
+/* ============================================
+   DANTE TERMINAL — Landing Page Styles
+   Retro green-on-black terminal aesthetic
+   ============================================ */
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --green: #00FF41;
+  --green-dim: #00cc33;
+  --green-glow: rgba(0, 255, 65, 0.15);
+  --green-bright: #33ff66;
+  --bg: #0A0A0A;
+  --bg-light: #111111;
+  --amber: #FFB000;
+  --font-mono: 'Courier New', 'Lucida Console', 'Monaco', monospace;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* --- Scanline Overlay --- */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanline-flicker 8s ease-in-out infinite;
+}
+
+@keyframes scanline-flicker {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.25; }
+}
+
+/* --- CRT Vignette --- */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* --- Layout --- */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Header / Hero --- */
+.hero {
+  text-align: center;
+  padding: 3rem 0 2rem;
+}
+
+.hero__title {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green-glow), 0 0 30px var(--green-glow);
+  margin-bottom: 0.25rem;
+}
+
+.hero__version {
+  font-size: 0.75rem;
+  color: var(--green-dim);
+  letter-spacing: 0.2em;
+  margin-bottom: 2rem;
+}
+
+.hero__prompt {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.hero__prompt .prompt-line {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.prompt-symbol {
+  color: var(--amber);
+}
+
+/* --- Typewriter Effect --- */
+.typewriter {
+  display: inline;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 0.6em solid var(--green);
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { border-color: var(--green); }
+  50% { border-color: transparent; }
+}
+
+.typewriter.done {
+  border-color: transparent;
+  animation: none;
+}
+
+/* Stand-alone blinking cursor */
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* --- Terminal Box --- */
+.terminal-box {
+  background: var(--bg-light);
+  border: 1px solid var(--green-dim);
+  border-radius: 2px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.terminal-box::before {
+  content: '[ SYSTEM OUTPUT ]';
+  position: absolute;
+  top: -0.65em;
+  left: 1rem;
+  background: var(--bg);
+  padding: 0 0.5rem;
+  font-size: 0.7rem;
+  color: var(--green-dim);
+  letter-spacing: 0.1em;
+}
+
+/* --- Feature List --- */
+.features {
+  list-style: none;
+  padding: 0;
+}
+
+.features li {
+  padding: 0.4rem 0;
+  padding-left: 1.8rem;
+  position: relative;
+}
+
+.features li::before {
+  content: '>';
+  position: absolute;
+  left: 0.4rem;
+  color: var(--amber);
+  font-weight: bold;
+}
+
+/* --- Section Dividers --- */
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--green-dim);
+  opacity: 0.3;
+  margin: 2rem 0;
+}
+
+/* --- Email Capture Section --- */
+.signup {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.signup__label {
+  font-size: 0.85rem;
+  color: var(--green-dim);
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.signup__form {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 480px;
+  margin: 0 auto 1rem;
+}
+
+.signup__input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 0.7rem 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.signup__input::placeholder {
+  color: rgba(0, 255, 65, 0.3);
+}
+
+.signup__input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+.signup__btn {
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.signup__btn:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 15px var(--green-glow);
+}
+
+.signup__note {
+  font-size: 0.7rem;
+  color: var(--green-dim);
+  opacity: 0.6;
+}
+
+/* Success state */
+.signup__success {
+  display: none;
+  color: var(--green-bright);
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+.signup__success.visible {
+  display: block;
+}
+
+/* --- Store Badges --- */
+.stores {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+}
+
+.store-badge {
+  display: inline-block;
+  border: 1px solid var(--green-dim);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.8rem;
+  color: var(--green-dim);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.store-badge:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* --- Footer --- */
+.footer {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  font-size: 0.7rem;
+  color: var(--green-dim);
+  opacity: 0.5;
+}
+
+.footer a {
+  color: var(--green-dim);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--green);
+}
+
+/* --- Responsive (mobile-first) --- */
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .hero {
+    padding: 2rem 0 1rem;
+  }
+
+  .hero__title {
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+  }
+
+  .signup__form {
+    flex-direction: column;
+  }
+
+  .signup__btn {
+    width: 100%;
+  }
+
+  .terminal-box {
+    padding: 1rem;
+  }
+
+  .features li {
+    font-size: 0.9rem;
+  }
+
+  .stores {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .store-badge {
+    width: 80%;
+    text-align: center;
+  }
+}
+
+/* --- Accessibility: reduce motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .typewriter {
+    animation: none;
+    border-color: var(--green);
+  }
+
+  .cursor {
+    animation: none;
+  }
+
+  body::before {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+/* --- Selection --- */
+::selection {
+  background: var(--green);
+  color: var(--bg);
+}
