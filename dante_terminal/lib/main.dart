@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'config/model_config.dart';
 import 'models/adventure_data.dart';
 import 'screens/benchmark_screen.dart';
 import 'screens/model_download_screen.dart';
@@ -105,6 +106,10 @@ class _AppLauncherState extends State<_AppLauncher> {
       onDownloadComplete: () {
         if (mounted) setState(() => _modelFound = true);
       },
+      modelUrl: ModelConfig.downloadUrl,
+      expectedSha256: ModelConfig.sha256,
+      modelFileName: ModelConfig.fileName,
+      expectedFileSize: ModelConfig.expectedFileSize,
     );
   }
 }

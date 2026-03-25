@@ -17,22 +17,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../config/model_config.dart';
 import '../services/model_download_service.dart';
-
-// ---------------------------------------------------------------------------
-// Model configuration constants
-// ---------------------------------------------------------------------------
-
-/// Download URL for Qwen2 1.5B Instruct Q4_K_M (BL-123 primary pick).
-const kDefaultModelUrl =
-    'https://huggingface.co/Qwen/Qwen2-1.5B-Instruct-GGUF/resolve/main/'
-    'qwen2-1_5b-instruct-q4_k_m.gguf';
-
-/// Filename stored in app documents directory.
-///
-/// Matches [InferenceService._findModelInDocuments]'s preferred-name list
-/// so the model is auto-discovered on subsequent launches.
-const kModelFileName = 'model.gguf';
 
 // ---------------------------------------------------------------------------
 // ModelDownloadScreen
@@ -47,7 +33,26 @@ class ModelDownloadScreen extends StatefulWidget {
   /// should respond by showing the game screen (e.g. [TerminalScreen]).
   final VoidCallback onDownloadComplete;
 
-  const ModelDownloadScreen({super.key, required this.onDownloadComplete});
+  /// Download URL for the GGUF model file.
+  final String modelUrl;
+
+  /// Expected lowercase hex SHA-256 hash for post-download verification.
+  final String? expectedSha256;
+
+  /// Filename to store in the app documents directory.
+  final String modelFileName;
+
+  /// Expected file size in bytes (for display purposes).
+  final int expectedFileSize;
+
+  const ModelDownloadScreen({
+    super.key,
+    required this.onDownloadComplete,
+    this.modelUrl = ModelConfig.downloadUrl,
+    this.expectedSha256 = ModelConfig.sha256,
+    this.modelFileName = ModelConfig.fileName,
+    this.expectedFileSize = ModelConfig.expectedFileSize,
+  });
 
   @override
   State<ModelDownloadScreen> createState() => ModelDownloadScreenState();
@@ -132,11 +137,12 @@ class ModelDownloadScreenState extends State<ModelDownloadScreen> {
 
     try {
       final docsDir = await getApplicationDocumentsDirectory();
-      final destPath = '${docsDir.path}/$kModelFileName';
+      final destPath = '${docsDir.path}/${widget.modelFileName}';
 
       final config = ModelDownloadConfig(
-        url: Uri.parse(kDefaultModelUrl),
+        url: Uri.parse(widget.modelUrl),
         destinationPath: destPath,
+        expectedSha256: widget.expectedSha256,
       );
 
       // Reset speed sampling baseline
@@ -319,7 +325,7 @@ class ModelDownloadScreenState extends State<ModelDownloadScreen> {
         _t('This enables fully offline gameplay.', dim: true),
         const SizedBox(height: 16),
         _t('Model: Qwen2-1.5B-Instruct', dim: true),
-        _t('Size:  ~986 MB', dim: true),
+        _t('Size:  ~${(widget.expectedFileSize / 1000000).round()} MB', dim: true),
         const SizedBox(height: 32),
         _actionButton('[ DOWNLOAD NOW ]', _startDownload),
       ],
