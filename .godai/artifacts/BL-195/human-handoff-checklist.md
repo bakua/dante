@@ -274,7 +274,12 @@
 **After you're done, the AI will:**
 - Generate iOS distribution certificate and provisioning profile instructions
 - Configure Xcode signing in the Flutter project
-- Build a signed IPA for TestFlight / App Store submission
+- Build a signed IPA using `scripts/archive_ios.sh` (BL-205) — run it with your Team ID and provisioning profile:
+  ```bash
+  ./scripts/archive_ios.sh --team-id YOUR_TEAM_ID --profile "Your Distribution Profile"
+  ```
+  The script wraps `flutter build ios`, `xcodebuild archive`, and `xcodebuild -exportArchive` with full error handling. It reads from `ios/ExportOptions.plist` (already configured with bundle ID `com.danteterminal.danteTerminal`).
+- Upload the resulting `.ipa` to TestFlight via `xcrun altool --upload-app` or Xcode Organizer
 - Fill in App Store Connect metadata using BL-156 listing copy
 
 ---
