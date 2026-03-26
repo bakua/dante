@@ -10,7 +10,7 @@
 
 | # | Task | Time | Cost | Depends On |
 |---|------|------|------|------------|
-| H1 | Push 29 commits to origin | 2 min | $0 | Nothing |
+| H1 | Push 33+ commits to origin | 2 min | $0 | Nothing |
 | H2 | Verify GitHub Pages deployment | 5 min | $0 | H1 |
 | H3 | Run app on physical Android device | 30 min | $0 | H1 |
 | H4 | Run app on physical iOS device | 30 min | $0 | H1 |
@@ -47,11 +47,11 @@
 
 ---
 
-## H1: Push 26 Commits to Origin
+## H1: Push 33+ Commits to Origin
 
-**Why:** 29 commits (BL-069 through BL-217) are sitting on local `main` but have never been pushed. CI hasn't run on them, GitHub Pages hasn't deployed, and the remote repo is 2+ weeks stale. Nothing the AI builds is "real" until this happens.
+**Why:** 33+ commits (BL-069 through BL-220) are sitting on local `main` but have never been pushed. CI hasn't run on them, GitHub Pages hasn't deployed, and the remote repo is 2+ weeks stale. Nothing the AI builds is "real" until this happens.
 
-**AI already prepared:** All 29 commits are clean, tests pass locally (196 tests), `flutter analyze` is clean. See **[Build Baseline Report](./../BL-216/build-baseline-report.md)** for full verification output (analysis, tests, Android .aab, iOS .app builds all passing).
+**AI already prepared:** All 33+ commits are clean, tests pass locally (196 tests), `flutter analyze` is clean. See **[Build Baseline Report](./../BL-216/build-baseline-report.md)** for full verification output (analysis, tests, Android .aab, iOS .app builds all passing).
 
 **Steps:**
 1. Open terminal in project root (`/Users/jakubtakac/workspace/dante/goadi`)
@@ -59,7 +59,7 @@
    ```bash
    git log --oneline origin/main..HEAD
    ```
-   You should see 29 commits from `808abd0` (BL-069) to the latest HEAD.
+   You should see 33+ commits from `808abd0` (BL-069) to the latest HEAD.
 3. Push:
    ```bash
    git push origin main
