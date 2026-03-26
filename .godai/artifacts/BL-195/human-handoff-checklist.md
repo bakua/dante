@@ -69,9 +69,11 @@
 **Estimated time:** 2 minutes
 
 **After you're done, the AI will:**
-- Triage CI results (BL-215 playbook exists)
-- If CI fails: diagnose and fix, then ask you to push again
-- If CI passes: green-light store submission pipeline
+- Triage CI results using the **[CI Failure Playbook](./../BL-215/ci-failure-playbook.md)** (BL-215)
+- **Expected:** iOS build will likely fail (no signing on CI) — this is known, see playbook Failure Mode 3
+- **Expected:** All other jobs (analyze, test, Android build) should pass — if not, playbook has exact fix for each
+- If CI fails unexpectedly: diagnose using the playbook's triage decision tree, fix, then ask you to push again
+- If CI passes (or only iOS fails as expected): green-light store submission pipeline
 
 ---
 
