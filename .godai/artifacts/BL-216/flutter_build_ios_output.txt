@@ -1,0 +1,6 @@
+Warning: Building for device with codesigning disabled. You will have to manually codesign before deploying to device.
+Building com.danteterminal.danteTerminal for device (ios-release)...
+Running pod install...                                             535ms
+Running Xcode build...                                          
+Xcode build done.                                           35.2s
+✓ Built build/ios/iphoneos/Runner.app (21.3MB)

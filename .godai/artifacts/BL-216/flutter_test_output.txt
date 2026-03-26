@@ -1,0 +1,225 @@
+
+00:00 +0: loading /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/game_state_persistence_test.dart                                                                                         
+00:01 +0: loading /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/game_state_persistence_test.dart                                                                                         
+00:01 +0: loading /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart                                                                                      
+00:01 +0: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +1: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +2: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +3: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +4: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +5: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +6: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +7: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +8: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +9: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                           
+00:01 +10: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +11: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +12: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +13: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +14: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +15: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +16: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +17: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +18: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +19: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +20: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +21: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +22: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +23: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +24: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +25: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +26: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +27: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +28: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +29: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +30: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +31: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +32: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +33: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +34: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +35: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +36: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +37: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +38: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +39: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +40: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +41: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +42: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +43: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +44: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +45: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +46: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +47: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +48: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +49: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +50: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +51: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +52: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +53: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +54: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +55: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +56: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +57: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +58: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +59: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +60: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +61: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +62: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +63: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +64: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +65: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +66: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +67: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +68: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +69: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +70: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +71: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/game_orchestrator_test.dart: GameOrchestrator renders TerminalGameScreen with initial messages                          
+00:01 +72: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen renders with green-on-black theme and monospace font                 
+00:02 +72: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen renders with green-on-black theme and monospace font                 
+00:02 +73: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen renders with green-on-black theme and monospace font                 
+00:02 +74: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/widget_test.dart: TerminalScreen renders header and system lines                                                                
+00:02 +75: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/widget_test.dart: TerminalScreen renders header and system lines                                                                
+00:02 +76: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/widget_test.dart: TerminalScreen renders header and system lines                                                                
+00:02 +77: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/widget_test.dart: TerminalScreen renders header and system lines                                                                
+00:02 +78: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/widget_test.dart: TerminalScreen renders header and system lines                                                                
+00:02 +79: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen typewriter animation reveals text character-by-character             
+00:02 +80: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen typewriter animation reveals text character-by-character             
+00:02 +80: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen stream error adds error message to history                           
+00:02 +81: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen stream error adds error message to history                           
+00:02 +81: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +82: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +83: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +84: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +85: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +86: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +87: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +88: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +89: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +90: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +91: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +92: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +93: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +94: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +95: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +96: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen three suggestion chips are displayed and tappable                    
+00:02 +96: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen suggestion chips are hidden during animation                         
+00:02 +97: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen suggestion chips are hidden during animation                         
+00:02 +97: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen text input submits command via onCommand callback                    
+00:02 +98: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen text input submits command via onCommand callback                    
+00:02 +99: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen text input submits command via onCommand callback                    
+00:02 +100: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen text input submits command via onCommand callback                   
+00:02 +101: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen text input submits command via onCommand callback                   
+00:02 +102: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/game_session_test.dart: GameSession.parseResponse parses well-formed response with 3 suggestions                               
+00:02 +103: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +104: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +105: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +106: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +107: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +108: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/model_download_service_test.dart: ModelDownloadService download completes successfully and produces correct file               
+00:02 +109: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen CRT scanline overlay is rendered via CustomPaint                    
+00:02 +110: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/screens/terminal_game_screen_test.dart: TerminalGameScreen CRT scanline overlay is rendered via CustomPaint                    
+00:02 +111: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +112: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +113: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +114: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +115: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +116: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +117: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +118: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +119: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +120: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +121: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +122: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +123: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +124: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +125: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +126: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +127: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +128: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +129: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +130: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +131: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +132: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +133: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +134: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +135: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +136: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +137: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +138: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +139: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +140: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +141: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +142: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +143: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +144: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +145: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +146: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +147: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +148: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +149: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +150: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +151: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +152: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +153: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +154: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +155: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +156: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +157: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +158: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +159: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +160: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +161: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +162: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +163: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +164: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +165: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +166: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +167: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +168: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +169: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +170: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +171: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +172: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +173: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +174: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +175: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +176: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +177: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +178: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +179: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +180: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +181: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +182: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +183: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +184: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +185: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +186: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +187: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:02 +188: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:03 +188: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:03 +189: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: ... generate produces valid GBNF-formatted response with 3 suggestions              
+00:03 +189: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend streams tokens incrementally, not as one chunk                 
+00:03 +190: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend streams tokens incrementally, not as one chunk                 
+00:03 +190: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend cycles through different responses on successive calls         
+00:04 +190: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend cycles through different responses on successive calls         
+00:05 +190: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend cycles through different responses on successive calls         
+00:05 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend cycles through different responses on successive calls         
+00:05 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:06 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:07 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:08 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:09 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:10 +191: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:10 +192: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend wraps around after exhausting all canned responses             
+00:10 +192: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend reset returns to the first response                            
+00:11 +192: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend reset returns to the first response                            
+00:12 +192: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend reset returns to the first response                            
+00:13 +192: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend reset returns to the first response                            
+00:13 +193: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend reset returns to the first response                            
+00:13 +193: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend all canned responses parse to exactly 3 suggestions            
+00:13 +194: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend all canned responses parse to exactly 3 suggestions            
+00:13 +194: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend all canned responses have non-empty narrative text             
+00:13 +195: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend all canned responses have non-empty narrative text             
+00:13 +195: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend generate accepts optional parameters without error             
+00:13 +196: /Users/jakubtakac/workspace/dante/goadi/dante_terminal/test/services/mock_inference_backend_test.dart: MockInferenceBackend generate accepts optional parameters without error             
+00:13 +196: All tests passed!                                                                                                                                                                          
