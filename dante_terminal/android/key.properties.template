@@ -1,0 +1,12 @@
+# Android release signing configuration for DANTE TERMINAL
+#
+# Copy this file to key.properties (same directory) and fill in real values.
+# key.properties is gitignored and must NEVER be committed.
+#
+# See: scripts/generate_keystore.sh to generate the keystore.
+# See: BL-195 handoff checklist (H5) for full instructions.
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=dante-release
+storeFile=/Users/YOUR_USERNAME/dante-release-key.jks

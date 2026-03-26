@@ -195,20 +195,22 @@
 
 ## H5: Generate Android Release Keystore
 
-**Why:** Google Play requires all APKs/AABs to be signed with a release keystore. The current build uses only the debug signing config. Without a release keystore, the CI cannot produce a store-uploadable build.
+**Why:** Google Play requires all APKs/AABs to be signed with a release keystore. The current build falls back to debug signing when no release keystore is configured. Without a release keystore, the build produces a debug-signed AAB that Google Play will reject.
 
-**AI already prepared:**
-- `android/app/build.gradle.kts` — has debug signing config, ready for release config to be added
-- `.gitignore` — already configured to exclude `*.keystore` files (security)
+**AI already prepared (BL-198):**
+- `scripts/generate_keystore.sh` — wraps keytool with configurable alias/output/validity, validates inputs, prints next-step instructions
+- `android/key.properties.template` — template with placeholder values, copy and fill in
+- `android/app/build.gradle.kts` — reads `key.properties` at build time; uses release signing config when present, falls back to debug when absent
+- `.gitignore` — already configured to exclude `key.properties`, `*.keystore`, and `*.jks` files
 - Application ID: `com.danteterminal.dante_terminal`
 
 **Steps:**
-1. Generate the keystore:
+1. Run the keystore generator script:
    ```bash
-   keytool -genkey -v -keystore ~/dante-release-key.jks \
-     -keyalg RSA -keysize 2048 -validity 10000 \
-     -alias dante-release
+   cd /Users/jakubtakac/workspace/dante/goadi
+   ./scripts/generate_keystore.sh
    ```
+   (Or customize: `./scripts/generate_keystore.sh --output ~/my-keystore.jks --alias my-alias`)
 2. When prompted, enter:
    - **Keystore password:** (choose a strong password, write it down securely)
    - **Key password:** (can be same as keystore password)
@@ -216,19 +218,27 @@
    - **Organization:** DANTE TERMINAL
    - **City/State/Country:** Your location / SK
 3. Store the keystore file securely (NOT in the repo — it's gitignored)
-4. Create a file at `dante_terminal/android/key.properties` (also gitignored):
+4. Create key.properties from the template:
+   ```bash
+   cp dante_terminal/android/key.properties.template dante_terminal/android/key.properties
+   ```
+5. Edit `dante_terminal/android/key.properties` with your real values:
    ```properties
    storePassword=YOUR_KEYSTORE_PASSWORD
    keyPassword=YOUR_KEY_PASSWORD
    keyAlias=dante-release
    storeFile=/Users/YOUR_USERNAME/dante-release-key.jks
    ```
-5. **IMPORTANT:** Back up `dante-release-key.jks` and passwords somewhere safe. If you lose the keystore, you can NEVER update the app on Google Play.
+6. Verify the signed build works:
+   ```bash
+   cd dante_terminal && flutter build appbundle --release
+   ```
+7. **IMPORTANT:** Back up `dante-release-key.jks` and passwords somewhere safe. If you lose the keystore, you can NEVER update the app on Google Play.
 
 **Estimated time:** 10 minutes
 
 **After you're done, the AI will:**
-- Update `android/app/build.gradle.kts` to read from `key.properties` and use the release signing config
+- `build.gradle.kts` already reads `key.properties` — no further AI changes needed (BL-198 completed this)
 - Update CI workflow to support release signing (via GitHub Secrets)
 - Build a signed AAB for Play Store upload
 
