@@ -1,0 +1,323 @@
+{
+  "metadata": {
+    "evaluationDate": "2026-03-26",
+    "rubricSource": "BL-171",
+    "evaluator": "AI (BL-210 automated rubric application)",
+    "model": "Canned/mock responses (not live Qwen2-1.5B inference)",
+    "method": "Applied BL-171 6-dimension rubric (1-5 integer scale) to 6 MockInferenceBackend responses + 4 hand-crafted responses spanning the full quality spectrum",
+    "dimensions": {
+      "D1": "Narrative Coherence",
+      "D2": "Command Parsing Accuracy",
+      "D3": "Suggestion Relevance",
+      "D4": "Tone Consistency",
+      "D5": "World State Tracking",
+      "D6": "Response Length Appropriateness"
+    }
+  },
+  "responses": [
+    {
+      "id": "R01",
+      "source": "MockInferenceBackend[0]",
+      "label": "Opening scene",
+      "scenarioMapping": "S1: Opening Scene Exploration",
+      "responseText": "You awaken on cold, damp stone. The air tastes of dust and ancient parchment. A flickering oil lamp rests in your hand, its amber glow revealing crumbling walls covered in faded glyphs. Rubble chokes the stairway above \u2014 no going back that way.\n\n> 1. Examine the glyphs on the walls\n> 2. Head north through the stone archway\n> 3. Search the rubble for anything useful",
+      "narrativeWordCount": 53,
+      "scores": {
+        "D1": 4,
+        "D2": 4,
+        "D3": 4,
+        "D4": 4,
+        "D5": 3,
+        "D6": 3
+      },
+      "composite": 3.67,
+      "rationale": {
+        "D1": "Strong logical flow: awaken \u2192 sense surroundings \u2192 discover constraint (rubble). Each sentence builds on the last. No contradictions.",
+        "D2": "Appropriate response to 'look around' \u2014 describes full room. Doesn't address a specific sub-action since this is an opening scene, but covers the expected scope.",
+        "D3": "Three distinct, scene-specific suggestions (glyphs, archway, rubble) all reference visible objects. Could be slightly more creative for a 5.",
+        "D4": "Atmospheric sensory language ('tastes of dust', 'amber glow', 'crumbling walls'). Dark tone maintained. Not quite sardonic enough for a 5.",
+        "D5": "Turn 1 \u2014 limited prior state to track. References oil lamp (inventory) and rubble (location feature). Scored 3 because there's no prior state to demonstrate tracking of.",
+        "D6": "53 words narrative, slightly below the 60-90 target. Complete thought, not truncated, but could be denser."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R02",
+      "source": "MockInferenceBackend[1]",
+      "label": "Exploration corridor",
+      "scenarioMapping": "S9: Atmospheric Description Request",
+      "responseText": "The corridor stretches ahead, its vaulted ceiling lost in shadow. Bioluminescent fungus clings to the stones overhead, casting an eerie blue-green glow that makes your shadow dance. Water drips somewhere ahead in a steady, hypnotic rhythm.\n\n> 1. Follow the sound of dripping water\n> 2. Examine the luminous fungus closely\n> 3. Continue cautiously down the corridor",
+      "narrativeWordCount": 48,
+      "scores": {
+        "D1": 4,
+        "D2": 3,
+        "D3": 4,
+        "D4": 4,
+        "D5": 3,
+        "D6": 3
+      },
+      "composite": 3.50,
+      "rationale": {
+        "D1": "Cohesive scene description: visual (glow, shadow) to auditory (dripping). Cause-effect: fungus creates glow which makes shadow dance.",
+        "D2": "3 because this is a generic exploration response. If player said 'listen carefully' (S9 prompt), auditory detail is present but not foregrounded \u2014 visual dominates.",
+        "D3": "Three contextual suggestions. 'Follow dripping water' and 'examine fungus' are scene-specific. 'Continue cautiously' is slightly generic but still valid.",
+        "D4": "'Eerie', 'hypnotic rhythm', 'lost in shadow' \u2014 solid atmospheric language. Misses the sardonic edge for a 5.",
+        "D5": "Consistent with underground archive setting. References fungus from Main Hall location data. No contradictions, but no active state tracking.",
+        "D6": "48 words narrative \u2014 below the 60 minimum target. Good prose density but needs 12+ more words."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R03",
+      "source": "MockInferenceBackend[2]",
+      "label": "Discovery (hidden alcove)",
+      "scenarioMapping": "S2: Object Manipulation",
+      "responseText": "Your fingers trace the carved stone and find a hidden seam. With a grinding protest, a section of wall pivots inward, revealing a narrow alcove. Inside, a brass key gleams atop a dusty leather journal. The air here smells of cedar and old ink.\n\n> 1. Take the brass key\n> 2. Open the leather journal\n> 3. Examine the alcove for traps",
+      "narrativeWordCount": 51,
+      "scores": {
+        "D1": 5,
+        "D2": 4,
+        "D3": 5,
+        "D4": 4,
+        "D5": 3,
+        "D6": 3
+      },
+      "composite": 4.00,
+      "rationale": {
+        "D1": "Excellent cause-and-effect chain: trace stone \u2192 find seam \u2192 wall pivots \u2192 alcove revealed \u2192 items visible. Each sentence builds on the last naturally.",
+        "D2": "Good response to an object manipulation command. The physical action (fingers tracing) maps to the command to 'reach under/examine'. Slight mismatch since it describes wall rather than desk.",
+        "D3": "Three perfectly distinct, scene-specific suggestions. Each references a newly-discovered object. They offer meaningfully different paths (acquire, read, investigate).",
+        "D4": "'Grinding protest', 'cedar and old ink' \u2014 strong sensory details (sound, smell). Not purely visual. Atmospheric but not distinctively sardonic.",
+        "D5": "Introduces new items consistently. Doesn't reference prior state, but as a discovery scene, this is expected.",
+        "D6": "51 words \u2014 below 60 target. Dense and well-crafted but short."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R04",
+      "source": "MockInferenceBackend[3]",
+      "label": "NPC encounter (ghost archivist)",
+      "scenarioMapping": "S3: NPC Conversation",
+      "responseText": "A pale figure materializes at the edge of your lamplight \u2014 translucent, flickering like a candle flame. The ghost of an archivist, spectacles perched on a nose that barely exists. It regards you with hollow eyes and speaks in a voice like rustling pages.\n\n> 1. Ask the ghost about this place\n> 2. Show the journal to the apparition\n> 3. Back away slowly",
+      "narrativeWordCount": 53,
+      "scores": {
+        "D1": 4,
+        "D2": 3,
+        "D3": 4,
+        "D4": 5,
+        "D5": 3,
+        "D6": 3
+      },
+      "composite": 3.67,
+      "rationale": {
+        "D1": "Strong visual description building from appearance to speech. Cohesive scene. Missing actual dialogue content for a full 5 on an NPC encounter.",
+        "D2": "3 because 'talk to the woman' would expect actual dialogue. This describes the NPC but doesn't deliver conversational content. Setup only.",
+        "D3": "Good suggestions: ask, show item, retreat. 'Show the journal' is particularly clever \u2014 references a specific inventory item. All contextually distinct.",
+        "D4": "Standout tone: 'nose that barely exists', 'voice like rustling pages' \u2014 sardonic, literary, memorable. This is marketing-excerpt quality prose.",
+        "D5": "Archivist context is appropriate to the Archive setting. No contradictions. Doesn't reference specific prior state.",
+        "D6": "53 words \u2014 below 60 target. The description is rich but there's room for actual NPC dialogue."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R05",
+      "source": "MockInferenceBackend[4]",
+      "label": "Flooded passage tension",
+      "scenarioMapping": "S9: Atmospheric Description Request (alternate)",
+      "responseText": "The water rises to your ankles as you press deeper into the flooded passage. Something slithers past your leg beneath the black surface. Your lamp gutters, threatening to die. Ahead, a faint phosphorescent glow promises dry ground \u2014 if you can reach it.\n\n> 1. Wade forward toward the glow\n> 2. Use the lamp to peer into the water\n> 3. Retreat to higher ground",
+      "narrativeWordCount": 52,
+      "scores": {
+        "D1": 4,
+        "D2": 3,
+        "D3": 3,
+        "D4": 4,
+        "D5": 3,
+        "D6": 3
+      },
+      "composite": 3.33,
+      "rationale": {
+        "D1": "Tension builds effectively: water rising \u2192 something slithers \u2192 lamp gutters \u2192 hope ahead. Clear cause-and-effect.",
+        "D2": "3 because this is a generic progression response. Doesn't strongly address any specific player command.",
+        "D3": "Standard forward/examine/retreat triad. Valid but generic \u2014 'wade forward' and 'retreat' are directional defaults, not scene-specific discoveries.",
+        "D4": "'Something slithers', 'lamp gutters', 'black surface' \u2014 atmospheric, uses touch and visual. Good but not sardonic.",
+        "D5": "Consistent with flooded passage. References lamp (inventory). No contradictions.",
+        "D6": "52 words \u2014 below 60 target. Effective but short."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R06",
+      "source": "MockInferenceBackend[5]",
+      "label": "Resolution (vault opened)",
+      "scenarioMapping": "S5: Inventory Management",
+      "responseText": "The ancient lock yields to the brass key with a satisfying click. The vault door swings open on silent hinges, revealing shelves of crystalline tablets glowing with inner fire. Each one holds a story \u2014 a memory of a world long drowned. You have found the heart of the Archive.\n\n> 1. Read the nearest crystal tablet\n> 2. Search for the master codex\n> 3. Look for another exit from the vault",
+      "narrativeWordCount": 55,
+      "scores": {
+        "D1": 4,
+        "D2": 4,
+        "D3": 4,
+        "D4": 4,
+        "D5": 4,
+        "D6": 3
+      },
+      "composite": 3.83,
+      "rationale": {
+        "D1": "Clean cause-effect: key used \u2192 lock yields \u2192 door opens \u2192 contents revealed. Culminating discovery feels earned.",
+        "D2": "Directly responds to 'use brass key on lock'. Narrates the action and its consequence. Doesn't note key consumption (per adventure data, it's consumable).",
+        "D3": "Scene-specific: crystal tablet, codex, exit. Each is a different interaction type (read, search, navigate).",
+        "D4": "'World long drowned', 'crystalline tablets glowing with inner fire' \u2014 literary, atmospheric. 'Heart of the Archive' ties to the game's thematic core.",
+        "D5": "References brass key (inventory item) being used. Implies state change (vault now open). Best state tracking of the 6 mocks.",
+        "D6": "55 words \u2014 below 60 target but close. Complete, dense prose."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R07",
+      "source": "Hand-crafted (intentionally poor)",
+      "label": "Fourth-wall break / chatbot mode",
+      "scenarioMapping": "S10: Meta-Command Handling",
+      "responseText": "Sure! As your AI game master, I can help you with that. You are currently in a room with some exits. You can go north, south, or east. There are also some items around. Let me know what you'd like to do next and I'll describe what happens!\n\n> 1. Go north\n> 2. Go south\n> 3. Try something else",
+      "narrativeWordCount": 52,
+      "scores": {
+        "D1": 2,
+        "D2": 2,
+        "D3": 1,
+        "D4": 1,
+        "D5": 1,
+        "D6": 3
+      },
+      "composite": 1.67,
+      "rationale": {
+        "D1": "Readable sentences but no narrative coherence \u2014 just a generic description with no scene-specific detail, no atmosphere, no connection between sentences.",
+        "D2": "If player said 'help', the response provides generic guidance, but ignores the in-world context entirely. Partial address of intent.",
+        "D3": "Suggestions are generic placeholders ('go north', 'go south', 'try something else'). 'Try something else' is not actionable. No scene-specific references.",
+        "D4": "Complete tone failure. 'Sure!' is chatbot-cheerful. 'As your AI game master' breaks the fourth wall explicitly. No atmospheric language whatsoever.",
+        "D5": "No location-specific detail, no inventory reference, no acknowledgment of any game state. Generic to the point of being stateless.",
+        "D6": "52 words \u2014 acceptable range but every word is filler."
+      },
+      "criticalFailures": ["fourth_wall_break"]
+    },
+    {
+      "id": "R08",
+      "source": "Hand-crafted (below average)",
+      "label": "Generic stub response",
+      "scenarioMapping": "S6: Nonsensical Input",
+      "responseText": "You try to eat the fungus. It tastes bad. You spit it out.\n\n> 1. Look around\n> 2. Go back\n> 3. Wait",
+      "narrativeWordCount": 16,
+      "scores": {
+        "D1": 2,
+        "D2": 3,
+        "D3": 2,
+        "D4": 2,
+        "D5": 2,
+        "D6": 1
+      },
+      "composite": 2.00,
+      "rationale": {
+        "D1": "Technically coherent (action \u2192 result \u2192 consequence) but so minimal it conveys nothing. No narrative texture or scene-building.",
+        "D2": "Actually parses the 'eat the ceiling fungus' command correctly and provides a plausible outcome. Correct intent, minimal execution.",
+        "D3": "Three suggestions present and formatted correctly, but completely generic. 'Wait' is particularly unhelpful. No scene references.",
+        "D4": "Flat, clinical tone. No atmosphere, no sensory detail beyond 'tastes bad'. Not chatbot-cheerful, but not interactive fiction either.",
+        "D5": "References fungus (location feature) but provides no other context. Barely acknowledges the world exists.",
+        "D6": "16 words \u2014 severely under the 40-word acceptable minimum. Stub response that would feel empty in the terminal UI."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R09",
+      "source": "Hand-crafted (good quality)",
+      "label": "Atmospheric listening scene",
+      "scenarioMapping": "S9: Atmospheric Description Request",
+      "responseText": "You close your eyes and let the darkness fill your ears. The dripping resolves into three distinct sources \u2014 a slow, fat plop to your left, a tinny patter ahead, and something deeper, almost rhythmic, like breathing from below the waterline. The walls amplify each sound into a wet cathedral of echoes. Your lamp flame hisses in protest at the damp air.\n\n> 1. Investigate the rhythmic sound beneath the water\n> 2. Follow the tinny patter ahead to its source\n> 3. Press your ear against the wall to listen deeper",
+      "narrativeWordCount": 76,
+      "scores": {
+        "D1": 5,
+        "D2": 5,
+        "D3": 5,
+        "D4": 5,
+        "D5": 4,
+        "D6": 5
+      },
+      "composite": 4.83,
+      "rationale": {
+        "D1": "Flawless narrative flow: eyes close \u2192 darkness fills ears \u2192 sounds resolve into three sources \u2192 walls amplify \u2192 lamp reacts. Each sentence builds on the last with cause-and-effect.",
+        "D2": "Perfectly addresses 'listen carefully' \u2014 foregrounds auditory detail exclusively. Three distinct sound sources demonstrate precise parsing of the 'listen' verb.",
+        "D3": "Each suggestion references a specific sound source from the narrative. They offer meaningfully different investigation paths. 'Press ear against wall' is a non-obvious, curiosity-rewarding option.",
+        "D4": "'Wet cathedral of echoes', 'breathing from below the waterline', 'lamp flame hisses in protest' \u2014 sardonic personification, literary metaphor, multi-sensory. Marketing-excerpt quality.",
+        "D5": "References lamp (inventory), damp air and water (Flooded Passage features), wall acoustics. Active world-state incorporation.",
+        "D6": "76 words \u2014 precisely within the 60-90 target. Every sentence earns its place. Suggestions are crisp (7-9 words each)."
+      },
+      "criticalFailures": []
+    },
+    {
+      "id": "R10",
+      "source": "Hand-crafted (mediocre with specific weakness)",
+      "label": "Puzzle attempt with state confusion",
+      "scenarioMapping": "S8: Multi-Step Puzzle",
+      "responseText": "You turn the dials on the pedestal, aligning the star symbols you remember from the mural upstairs. The mechanism groans and something clicks deep within the stone. But wait \u2014 didn't you already use the cipher wheel? The last disc won't budge. A faint hum rises from the Codex itself, its black cover seeming to pulse. The air grows warmer.\n\n> 1. Force the last disc into position\n> 2. Re-examine the cipher wheel for clues\n> 3. Touch the pulsing Codex",
+      "narrativeWordCount": 67,
+      "scores": {
+        "D1": 3,
+        "D2": 4,
+        "D3": 4,
+        "D4": 4,
+        "D5": 2,
+        "D6": 4
+      },
+      "composite": 3.50,
+      "rationale": {
+        "D1": "Mostly coherent but the 'didn't you already use the cipher wheel?' introduces confusion \u2014 the player hasn't used it yet, they're entering the combination. The mid-response contradiction undermines the flow.",
+        "D2": "Correctly interprets 'enter the combination' as turning dials and aligning symbols. Good physical narration of the puzzle interaction.",
+        "D3": "Three distinct suggestions. 'Force the disc' vs 're-examine' vs 'touch Codex' offers genuine tactical variety. All reference scene-specific objects.",
+        "D4": "'Mechanism groans', 'black cover seeming to pulse', 'air grows warmer' \u2014 atmospheric tension building. Good sensory range.",
+        "D5": "Significant state confusion: questions whether cipher wheel was 'already used' when the player is actively using it. This would confuse a player reading the transcript. The disc-won't-budge complication is interesting narratively but unjustified by game state.",
+        "D6": "67 words \u2014 precisely within 60-90 target. Good density."
+      },
+      "criticalFailures": []
+    }
+  ],
+  "aggregation": {
+    "dimensionAverages": {
+      "D1": 3.70,
+      "D2": 3.50,
+      "D3": 3.60,
+      "D4": 3.70,
+      "D5": 2.80,
+      "D6": 3.10
+    },
+    "dimensionMinimums": {
+      "D1": {"minimum": 3.0, "actual": 3.70, "pass": true},
+      "D2": {"minimum": 3.0, "actual": 3.50, "pass": true},
+      "D3": {"minimum": 2.5, "actual": 3.60, "pass": true},
+      "D4": {"minimum": 2.5, "actual": 3.70, "pass": true},
+      "D5": {"minimum": 2.5, "actual": 2.80, "pass": true},
+      "D6": {"minimum": 3.0, "actual": 3.10, "pass": true}
+    },
+    "compositeScore": 3.40,
+    "compositeDecision": "SHIP WITH CAVEATS",
+    "perScenarioFloorViolations": [
+      {"response": "R07", "dimension": "D3", "score": 1, "note": "Suggestions completely generic and non-actionable"},
+      {"response": "R07", "dimension": "D4", "score": 1, "note": "Fourth-wall break, chatbot-cheerful tone"},
+      {"response": "R07", "dimension": "D5", "score": 1, "note": "Zero world state acknowledgment"},
+      {"response": "R08", "dimension": "D6", "score": 1, "note": "16 words, severely under minimum"}
+    ],
+    "criticalFailures": [
+      {"response": "R07", "type": "fourth_wall_break", "note": "'As your AI game master' breaks fiction entirely"}
+    ],
+    "qualityDistribution": {
+      "excellent_4plus": ["R09"],
+      "good_3_5_to_4": ["R01", "R03", "R04", "R06", "R10"],
+      "adequate_3_to_3_5": ["R02", "R05"],
+      "below_average_2_to_3": ["R08"],
+      "poor_below_2": ["R07"]
+    },
+    "scoreRange": {
+      "minimum": 1.67,
+      "maximum": 4.83,
+      "range": 3.16,
+      "meetsSpectrumRequirement": true,
+      "belowTwoExists": true,
+      "aboveFourExists": true
+    }
+  }
+}
