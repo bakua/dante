@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - DANTE TERMINAL</title>
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --text: #C0C0C0;
+      --heading: #00FF41;
+      --accent: #00AA2A;
+      --link: #00FF41;
+      --border: #1A3A1A;
+      --table-bg: #0F0F0F;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem 1rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: var(--heading);
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    h2 {
+      color: var(--heading);
+      font-size: 1.1rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      color: var(--accent);
+      font-size: 1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    p { margin-bottom: 1rem; }
+    .meta {
+      color: var(--accent);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    ul {
+      margin: 0.5rem 0 1rem 1.5rem;
+      list-style-type: none;
+    }
+    ul li::before {
+      content: "- ";
+      color: var(--accent);
+    }
+    strong { color: #E0E0E0; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: var(--table-bg);
+      color: var(--heading);
+      font-weight: normal;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+    td { background: var(--bg); }
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    .summary-box {
+      border: 1px solid var(--border);
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 480px) {
+      body { padding: 1rem 0.75rem; }
+      h1 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Privacy Policy</h1>
+<p class="meta">
+  DANTE TERMINAL<br>
+  Last Updated: March 25, 2026<br>
+  Effective Date: March 25, 2026
+</p>
+
+<hr>
+
+<h2>1. Introduction</h2>
+<p>This Privacy Policy describes how DANTE TERMINAL ("the App," "we," "us," or "our") handles information when you use our mobile text adventure game. We are committed to protecting your privacy. DANTE TERMINAL is designed as a privacy-first, offline application.</p>
+
+<h2>2. Data Collection</h2>
+<p><strong>DANTE TERMINAL does not collect, store, transmit, or share any personal data.</strong></p>
+<p>Specifically, we do <strong>not</strong> collect:</p>
+<ul>
+  <li>Names, email addresses, or contact information</li>
+  <li>Device identifiers or advertising IDs</li>
+  <li>Location data (GPS, IP-based, or otherwise)</li>
+  <li>Usage analytics or behavioral data</li>
+  <li>Crash reports or diagnostic telemetry</li>
+  <li>In-game text inputs or commands</li>
+  <li>Gameplay history, session data, or progress (beyond what is stored locally on your device)</li>
+  <li>Financial or payment information (the app contains no in-app purchases)</li>
+</ul>
+<p>All gameplay data &mdash; including your text commands, game state, and session history &mdash; exists solely on your device and is never transmitted to any server.</p>
+
+<h2>3. Third-Party Services</h2>
+<p><strong>DANTE TERMINAL does not integrate any third-party services that collect user data.</strong></p>
+<p>The app contains:</p>
+<ul>
+  <li>No third-party analytics SDKs (no Google Analytics, Firebase Analytics, Mixpanel, etc.)</li>
+  <li>No advertising SDKs or ad networks</li>
+  <li>No social media SDKs or share-to-social integrations</li>
+  <li>No crash reporting SDKs that transmit data externally</li>
+  <li>No attribution or marketing tracking tools</li>
+  <li>No A/B testing or feature-flagging services</li>
+</ul>
+<p>The only third-party infrastructure the app interacts with is a content delivery network (CDN) used to deliver the AI model file during the one-time initial download. This interaction is described in Section 5 below.</p>
+
+<h2>4. On-Device AI &amp; Offline Operation</h2>
+<p>DANTE TERMINAL uses artificial intelligence to generate interactive fiction responses during gameplay. <strong>All AI inference runs entirely on your device.</strong></p>
+<ul>
+  <li>The AI model runs locally on your phone or tablet using on-device machine learning inference</li>
+  <li>No text you type is ever sent to a server for AI processing</li>
+  <li>No AI-generated responses are transmitted off your device</li>
+  <li>No cloud-based AI services (such as ChatGPT, Claude, or similar) are used at any point during gameplay</li>
+  <li>The AI model operates without an internet connection after the initial download</li>
+  <li>No training or fine-tuning of the AI model occurs on your device or elsewhere using your inputs</li>
+</ul>
+<p>The on-device AI model is a pre-trained language model in GGUF format. It generates text responses based solely on your in-game commands and the current game context. Your interactions with the AI are never used to improve or train any AI model.</p>
+
+<h2>5. Model Download &amp; Network Usage</h2>
+<p>DANTE TERMINAL requires a one-time download of an AI model file after installation. This is the <strong>only</strong> network activity the app performs.</p>
+
+<h3>During the model download:</h3>
+<ul>
+  <li>The app connects to a content delivery network (CDN) to download the AI model file (approximately 1.5 GB)</li>
+  <li>The download uses a standard HTTPS connection</li>
+  <li>No personal data, device identifiers, or user information is transmitted during this download</li>
+  <li>The CDN may log standard web server access logs (IP address, timestamp, bytes transferred) as part of normal infrastructure operation; these logs are not associated with any user identity and are managed by the CDN provider's own privacy policy</li>
+</ul>
+
+<h3>After the model download:</h3>
+<ul>
+  <li>The app functions entirely offline</li>
+  <li>No internet connection is required for gameplay</li>
+  <li>No data is sent to or received from any server during gameplay</li>
+  <li>The app does not check for updates, sync data, or perform any background network activity</li>
+</ul>
+
+<h2>6. Children's Privacy (COPPA Compliance)</h2>
+<p>DANTE TERMINAL does not knowingly collect personal information from children under the age of 13 (or the applicable age in your jurisdiction). Because the app collects <strong>no personal data from any user of any age</strong>, there is no mechanism through which children's data could be collected, stored, or shared.</p>
+<p>Parents and guardians should be aware that DANTE TERMINAL is an AI-powered text adventure game that generates fictional narrative content. While the game is designed for general audiences, AI-generated text may occasionally produce content more suitable for older players. We recommend parental guidance for younger users.</p>
+
+<h2>7. Data Retention</h2>
+<p>Because DANTE TERMINAL does not collect data, there is no data retention policy applicable to user data. Game save data stored locally on your device persists until you delete the app or clear its data through your device settings.</p>
+
+<h2>8. International Compliance</h2>
+<p>DANTE TERMINAL operates identically in all regions. Because no personal data is collected, processed, or transferred, no cross-border data transfer occurs. The app is compliant with:</p>
+<ul>
+  <li><strong>GDPR</strong> (EU General Data Protection Regulation) &mdash; no personal data is processed</li>
+  <li><strong>CCPA</strong> (California Consumer Privacy Act) &mdash; no personal information is collected or sold</li>
+  <li><strong>COPPA</strong> (Children's Online Privacy Protection Act) &mdash; no data collected from any users</li>
+  <li><strong>LGPD</strong> (Brazil's General Data Protection Law) &mdash; no personal data is processed</li>
+  <li><strong>PIPEDA</strong> (Canada) &mdash; no personal information is collected</li>
+</ul>
+
+<h2>9. Your Rights</h2>
+<p>Although we collect no data, if applicable privacy laws in your jurisdiction grant you rights regarding personal data (such as access, correction, deletion, portability, or opt-out), we affirm that:</p>
+<ul>
+  <li>There is no personal data to access, correct, or delete</li>
+  <li>No data sale or sharing occurs from which to opt out</li>
+  <li>You may contact us at any time to confirm this</li>
+</ul>
+
+<h2>10. Changes to This Policy</h2>
+<p>We may update this Privacy Policy from time to time. If we make material changes, the updated policy will be made available at this URL and within the app store listing. The "Last Updated" date at the top will be revised accordingly.</p>
+<p>Your continued use of the app after any changes constitutes acceptance of the updated policy.</p>
+
+<h2>11. Contact Information</h2>
+<p>If you have questions, concerns, or requests regarding this Privacy Policy, please contact us at:</p>
+<p>
+  <strong>Email:</strong> <a href="mailto:privacy@danteterminal.com">privacy@danteterminal.com</a>
+</p>
+<p>
+  <strong>Mailing Address:</strong><br>
+  DANTE TERMINAL<br>
+  <!-- TODO: Replace with actual mailing address before store submission -->
+  [Physical address to be provided before store submission]
+</p>
+<p>We will respond to privacy inquiries within 30 days.</p>
+
+<hr>
+
+<div class="summary-box">
+  <h2 style="margin-top:0; border:none; padding:0;">Quick Summary</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Does the app collect personal data?</td><td>No</td></tr>
+    <tr><td>Does the app use cloud-based AI?</td><td>No &mdash; all AI runs on-device</td></tr>
+    <tr><td>Does the app require internet?</td><td>Only for the initial model download</td></tr>
+    <tr><td>Does the app contain ads or tracking?</td><td>No</td></tr>
+    <tr><td>Does the app have in-app purchases?</td><td>No</td></tr>
+    <tr><td>Is gameplay data sent to a server?</td><td>No &mdash; stays on your device</td></tr>
+    <tr><td>Does the app use third-party services?</td><td>No</td></tr>
+    <tr><td>Does the app collect data from children?</td><td>No &mdash; collects no data from anyone</td></tr>
+  </table>
+</div>
+
+</body>
+</html>
