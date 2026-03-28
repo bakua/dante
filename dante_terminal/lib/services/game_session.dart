@@ -461,7 +461,39 @@ class GameSession {
         .map((m) => m.group(2)!.trim())
         .toList();
 
-    return (narrative: narrative, suggestions: suggestions);
+    // When structured suggestions were successfully parsed from the
+    // suggestion block, strip any duplicate numbered-action lines that the
+    // model leaked into the narrative (BL-274 / BL-277).
+    final cleanedNarrative = suggestions.isNotEmpty
+        ? _stripNumberedActions(narrative)
+        : narrative;
+
+    return (narrative: cleanedNarrative, suggestions: suggestions);
+  }
+
+  /// Remove numbered-action lines that duplicate the structured suggestion
+  /// block from the narrative text.
+  ///
+  /// Matches lines starting with optional whitespace followed by a digit and
+  /// either `)` or `.` — e.g. `1. Explore the cave` or `2) Go north`.
+  /// This catches the common LLM failure mode of listing actions both inline
+  /// in the narrative AND in the structured suggestion block.
+  ///
+  /// **Safety fallback:** if stripping would remove ALL lines (meaning the
+  /// entire narrative is numbered items — likely intentional prose such as a
+  /// list of clues), the original narrative is returned unchanged.
+  static String _stripNumberedActions(String narrative) {
+    final pattern = RegExp(r'^\s*\d+[.)]\s');
+    final lines = narrative.split('\n');
+    final filtered = lines.where((line) => !pattern.hasMatch(line)).toList();
+
+    // Safety: if every line matched, the "numbered" content is probably
+    // intentional prose (e.g. "3 torches line the wall"). Preserve it.
+    if (filtered.isEmpty) {
+      return narrative;
+    }
+
+    return filtered.join('\n').trim();
   }
 
   /// Reset the session, clearing all history and turn count.

@@ -295,6 +295,126 @@ void main() {
   });
 
   // =========================================================================
+  // Area 3b: Duplicate action stripping (BL-274 / BL-277)
+  // =========================================================================
+  group('Duplicate action stripping', () {
+    test('strips numbered actions from narrative when suggestions are parsed',
+        () {
+      // Model duplicated actions in both narrative and suggestion block.
+      const raw = 'The cavern opens into a vast underground lake.\n'
+          '1. Swim across the lake\n'
+          '2. Search the shoreline\n'
+          '3. Call out into the darkness\n\n'
+          '> 1. Swim across the lake\n'
+          '> 2. Search the shoreline\n'
+          '> 3. Call out into the darkness';
+
+      final result = GameSession.parseResponse(raw);
+
+      // Narrative should have duplicates stripped.
+      expect(result.narrative,
+          'The cavern opens into a vast underground lake.');
+      // Suggestions should be parsed normally.
+      expect(result.suggestions, hasLength(3));
+      expect(result.suggestions[0], 'Swim across the lake');
+      expect(result.suggestions[1], 'Search the shoreline');
+      expect(result.suggestions[2], 'Call out into the darkness');
+    });
+
+    test('leaves narrative unchanged when no duplicate actions present', () {
+      const raw = 'The ancient door groans open, revealing a vast '
+          'underground library. Dust motes dance in pale glow.\n\n'
+          '> 1. Explore the nearest bookshelf\n'
+          '> 2. Follow the moss-lit corridor deeper\n'
+          '> 3. Examine the inscriptions on the door frame';
+
+      final result = GameSession.parseResponse(raw);
+
+      expect(result.narrative,
+          'The ancient door groans open, revealing a vast '
+          'underground library. Dust motes dance in pale glow.');
+      expect(result.suggestions, hasLength(3));
+    });
+
+    test('preserves numbered prose content that is not an action list', () {
+      // Numbered items that are NOT duplicated actions — e.g. a clue list.
+      // When no suggestions are parsed, stripping should NOT apply.
+      const raw = 'The scroll reads:\n'
+          '1. The key lies beneath the third stone\n'
+          '2. Beware the guardian of the gate\n'
+          '3. Only the worthy may pass';
+
+      final result = GameSession.parseResponse(raw);
+
+      // No suggestions parsed (no suggestion block), so narrative is untouched.
+      expect(result.narrative, raw.trim());
+      expect(result.suggestions, isEmpty);
+    });
+
+    test('handles parenthetical numbered formats like 1) 2) 3)', () {
+      const raw = 'A fork in the tunnel.\n'
+          '1) Take the left passage\n'
+          '2) Take the right passage\n'
+          '3) Go back the way you came\n\n'
+          '> 1. Take the left passage\n'
+          '> 2. Take the right passage\n'
+          '> 3. Go back the way you came';
+
+      final result = GameSession.parseResponse(raw);
+
+      expect(result.narrative, 'A fork in the tunnel.');
+      expect(result.suggestions, hasLength(3));
+      expect(result.suggestions[0], 'Take the left passage');
+    });
+
+    test('preserves all-numbered narrative via safety fallback', () {
+      // When EVERY line of the narrative is numbered, it is likely intentional
+      // prose (e.g. a riddle or numbered clue list). The safety fallback
+      // should preserve the original narrative even when suggestions exist.
+      const raw = '1. The first seal is broken\n'
+          '2. The second seal crumbles\n'
+          '3. The third seal holds fast\n\n'
+          '> 1. Touch the third seal\n'
+          '> 2. Read the inscription\n'
+          '> 3. Step back';
+
+      final result = GameSession.parseResponse(raw);
+
+      // Safety fallback: all lines matched the pattern, so narrative preserved.
+      expect(result.narrative,
+          '1. The first seal is broken\n'
+          '2. The second seal crumbles\n'
+          '3. The third seal holds fast');
+      expect(result.suggestions, hasLength(3));
+      expect(result.suggestions[0], 'Touch the third seal');
+    });
+
+    test('strips actions with leading whitespace', () {
+      const raw = 'The corridor splits ahead.\n'
+          '  1. Go left\n'
+          '  2. Go right\n'
+          '  3. Wait here\n\n'
+          '> 1. Go left\n'
+          '> 2. Go right\n'
+          '> 3. Wait here';
+
+      final result = GameSession.parseResponse(raw);
+
+      expect(result.narrative, 'The corridor splits ahead.');
+      expect(result.suggestions, hasLength(3));
+    });
+
+    test('does not strip during streaming (no suggestions yet)', () {
+      // During streaming, no double-newline yet — narrative returned as-is.
+      const partial = 'The cavern opens.\n1. Swim across the lake\n2. Search';
+      final result = GameSession.parseResponse(partial);
+
+      expect(result.narrative, partial);
+      expect(result.suggestions, isEmpty);
+    });
+  });
+
+  // =========================================================================
   // Area 4: Save-state / restore round-trip with full fidelity
   // =========================================================================
   group('Save-restore round-trip', () {
