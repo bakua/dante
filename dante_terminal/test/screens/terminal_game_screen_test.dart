@@ -291,9 +291,9 @@ void main() {
         final textField = tester.widget<TextField>(find.byType(TextField));
         final hintColor = textField.decoration?.hintStyle?.color;
         // Old failing color was 0xFF004D15 (1.95:1 ratio).
-        // New color should be 0xFF33884D (~4.5:1 ratio).
+        // Current color is kTerminalDim (#00AA2A) — 6.40:1 ratio.
         expect(hintColor, isNot(const Color(0xFF004D15)));
-        expect(hintColor, const Color(0xFF33884D));
+        expect(hintColor, kTerminalDim);
       });
 
       // ── Touch targets ──────────────────────────────────────────────
@@ -349,6 +349,145 @@ void main() {
         final iconButton =
             tester.widget<IconButton>(find.byType(IconButton));
         expect(iconButton.tooltip, 'Send command');
+      });
+
+      // ── Semantics ────────────────────────────────────────────────────
+
+      testWidgets('suggestion chips have Semantics(button: true) wrappers',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(
+              suggestions: ['Look around', 'Open door', 'Check inventory'],
+            ),
+          ),
+        );
+
+        // Each suggestion chip should be wrapped in a Semantics widget
+        // with button: true and a label containing the suggestion text.
+        final semanticsWidgets = tester
+            .widgetList<Semantics>(
+              find.byWidgetPredicate(
+                (widget) =>
+                    widget is Semantics &&
+                    widget.properties.button == true &&
+                    (widget.properties.label ?? '').startsWith('Suggestion'),
+              ),
+            )
+            .toList();
+
+        // Should find exactly 3 suggestion-specific button-semantic wrappers.
+        expect(semanticsWidgets.length, 3);
+
+        // Verify labels contain suggestion text.
+        final labels =
+            semanticsWidgets.map((s) => s.properties.label ?? '').toList();
+        expect(labels[0], contains('Look around'));
+        expect(labels[1], contains('Open door'));
+        expect(labels[2], contains('Check inventory'));
+      });
+
+      testWidgets('AI response area has Semantics(liveRegion: true)',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        // Find a Semantics widget with liveRegion: true wrapping the
+        // ListView.
+        final liveRegion = find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics && widget.properties.liveRegion == true,
+        );
+        expect(liveRegion, findsOneWidget);
+
+        // The live region should be an ancestor of the ListView.
+        final listView = find.descendant(
+          of: liveRegion,
+          matching: find.byType(ListView),
+        );
+        expect(listView, findsOneWidget);
+      });
+
+      testWidgets('text input has Semantics(textField: true) wrapper',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        // Find a Semantics widget with textField: true wrapping the
+        // TextField.
+        final textFieldSemantics = find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.textField == true,
+        );
+        expect(textFieldSemantics, findsWidgets);
+
+        // Verify it has the 'Enter command' label.
+        final semanticsWidget = tester.widgetList<Semantics>(
+          textFieldSemantics,
+        ).where((s) => s.properties.label == 'Enter command');
+        expect(semanticsWidget.length, 1);
+      });
+
+      testWidgets('CRT overlay has ExcludeSemantics',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: TerminalGameScreen(),
+          ),
+        );
+
+        // The CRT CustomPaint should be a descendant of ExcludeSemantics.
+        final crtPaint = find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint &&
+              widget.painter is CrtScanlinePainter,
+        );
+        expect(crtPaint, findsOneWidget);
+
+        final excludeSemantics = find.ancestor(
+          of: crtPaint,
+          matching: find.byType(ExcludeSemantics),
+        );
+        expect(excludeSemantics, findsOneWidget);
+      });
+
+      testWidgets('blinking cursor has ExcludeSemantics during animation',
+          (WidgetTester tester) async {
+        final controller = StreamController<String>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: TerminalGameScreen(
+              responseStream: controller.stream,
+            ),
+          ),
+        );
+
+        controller.add('tok');
+        await tester.pump();
+
+        // The cursor block character should be present.
+        final cursor = find.text('\u2588');
+        expect(cursor, findsOneWidget);
+
+        // The cursor should be a descendant of ExcludeSemantics.
+        final excludeSemantics = find.ancestor(
+          of: cursor,
+          matching: find.byType(ExcludeSemantics),
+        );
+        expect(excludeSemantics, findsOneWidget);
+
+        await controller.close();
+        for (int i = 0; i < 15; i++) {
+          await tester.pump(const Duration(milliseconds: 18));
+        }
       });
 
       // ── Reduce motion ──────────────────────────────────────────────

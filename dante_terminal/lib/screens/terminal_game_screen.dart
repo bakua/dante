@@ -17,6 +17,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 // ═════════════════════════════════════════════════════════════════════
 // Public types
@@ -314,12 +315,21 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
 
   void _finalizeResponse() {
     if (_typewriterBuffer.isNotEmpty) {
+      final completedText = _typewriterBuffer;
       setState(() {
         _messages.add(TerminalMessage(_typewriterBuffer));
         _typewriterBuffer = '';
         _isAnimating = false;
       });
       _scrollToBottom();
+      // Announce completed response to screen readers.
+      if (mounted) {
+        SemanticsService.sendAnnouncement(
+          View.of(context),
+          completedText,
+          TextDirection.ltr,
+        );
+      }
     } else {
       setState(() => _isAnimating = false);
     }
@@ -432,9 +442,14 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
         children: widget.suggestions.asMap().entries.map((entry) {
           final idx = entry.key + 1;
           final text = entry.value;
-          return GestureDetector(
-            onTap: () => _onSuggestionTap(text),
-            child: Container(
+          return Semantics(
+            button: true,
+            label: 'Suggestion $idx: $text',
+            hint: 'Double tap to use this action',
+            enabled: !_isAnimating,
+            child: GestureDetector(
+              onTap: () => _onSuggestionTap(text),
+              child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               constraints:
@@ -454,7 +469,7 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
                 ),
               ),
             ),
-          );
+          ));
         }).toList(),
       ),
     );
@@ -472,31 +487,37 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
           ),
         ),
         Expanded(
-          child: TextField(
-            controller: _inputController,
-            onSubmitted: (_) => _onSubmit(),
-            enabled: !_isAnimating,
-            style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 16,
-              color: kTerminalGreen,
-            ),
-            cursorColor: kTerminalGreen,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              hintText: 'What do you do?',
-              hintStyle: TextStyle(
+          child: Semantics(
+            textField: true,
+            label: 'Enter command',
+            child: TextField(
+              controller: _inputController,
+              onSubmitted: (_) => _onSubmit(),
+              enabled: !_isAnimating,
+              style: const TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 16,
-                color: Color(0xFF33884D),
+                color: kTerminalGreen,
+              ),
+              cursorColor: kTerminalGreen,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+                hintText: 'What do you do?',
+                hintStyle: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 16,
+                  color: kTerminalDim,
+                ),
               ),
             ),
           ),
         ),
         if (_isAnimating)
-          const _BlinkingTerminalCursor()
+          const ExcludeSemantics(
+            child: _BlinkingTerminalCursor(),
+          )
         else
           IconButton(
             icon: const Icon(Icons.send, color: kTerminalGreen, size: 20),
@@ -529,15 +550,18 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
                 children: [
                   // Scrollable message history
                   Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: itemCount,
-                      itemBuilder: (context, index) {
-                        if (index < _messages.length) {
-                          return _buildMessageLine(_messages[index]);
-                        }
-                        return _buildTypewriterLine();
-                      },
+                    child: Semantics(
+                      liveRegion: true,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: itemCount,
+                        itemBuilder: (context, index) {
+                          if (index < _messages.length) {
+                            return _buildMessageLine(_messages[index]);
+                          }
+                          return _buildTypewriterLine();
+                        },
+                      ),
                     ),
                   ),
                   // Suggestion chips
@@ -554,9 +578,11 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
             ),
             // ── CRT scanline overlay ──────────────────────────────
             Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: const CrtScanlinePainter(),
+              child: ExcludeSemantics(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: const CrtScanlinePainter(),
+                  ),
                 ),
               ),
             ),
