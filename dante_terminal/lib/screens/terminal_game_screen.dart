@@ -19,6 +19,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import '../services/content_report_service.dart';
+
 // ═════════════════════════════════════════════════════════════════════
 // Public types
 // ═════════════════════════════════════════════════════════════════════
@@ -131,12 +133,17 @@ class TerminalGameScreen extends StatefulWidget {
   /// Messages to prepopulate in the terminal history on first build.
   final List<TerminalMessage> initialMessages;
 
+  /// Optional [ContentReportService] for persisting flagged AI responses.
+  /// If not provided, a default instance is created.
+  final ContentReportService? reportService;
+
   const TerminalGameScreen({
     super.key,
     this.responseStream,
     this.onCommand,
     this.suggestions = const [],
     this.initialMessages = const [],
+    this.reportService,
   });
 
   @override
@@ -150,6 +157,8 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<TerminalMessage> _messages = [];
+
+  late final ContentReportService _reportService;
 
   // ─── Typewriter state ───────────────────────────────────────────
   String _typewriterBuffer = '';
@@ -173,6 +182,7 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
   @override
   void initState() {
     super.initState();
+    _reportService = widget.reportService ?? ContentReportService();
     _messages.addAll(widget.initialMessages);
     _subscribeToStream();
   }
@@ -382,6 +392,126 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════
+  // Content reporting (BL-279 — store compliance)
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Returns the most recent AI narrative message, or `null` if none exist.
+  String? _getLatestAiResponse() {
+    for (int i = _messages.length - 1; i >= 0; i--) {
+      if (!_messages[i].isPlayer && !_messages[i].isSystem) {
+        return _messages[i].text;
+      }
+    }
+    return null;
+  }
+
+  /// Shows the Report Content dialog or a snackbar if no AI response exists.
+  void _showReportDialog() {
+    final latestResponse = _getLatestAiResponse();
+    if (latestResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No AI response to report.',
+            style: TextStyle(fontFamily: 'monospace'),
+          ),
+          backgroundColor: Color(0xFF1A1A1A),
+        ),
+      );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: kTerminalBackground,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(color: kTerminalDim),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        title: const Text(
+          'REPORT CONTENT',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 16,
+            color: kTerminalGreen,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Flag this response as inappropriate?',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 12,
+                color: kTerminalDim,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(maxHeight: 200),
+              decoration: BoxDecoration(
+                border: Border.all(color: kTerminalDim),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  latestResponse,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    color: kTerminalGreen,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text(
+              'CANCEL',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                color: kTerminalDim,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await _reportService.reportContent(latestResponse);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Content reported. Thank you for your feedback.',
+                      style: TextStyle(fontFamily: 'monospace'),
+                    ),
+                    backgroundColor: Color(0xFF1A1A1A),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              'REPORT',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                color: Color(0xFFFF4444),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
   // Widget builders
   // ═══════════════════════════════════════════════════════════════════
 
@@ -583,6 +713,27 @@ class TerminalGameScreenState extends State<TerminalGameScreen> {
                   child: CustomPaint(
                     painter: const CrtScanlinePainter(),
                   ),
+                ),
+              ),
+            ),
+            // ── Report Content button (BL-279) ──────────────────
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Semantics(
+                button: true,
+                label: 'Report content',
+                child: IconButton(
+                  key: const Key('reportContentButton'),
+                  icon: const Icon(
+                    Icons.flag_outlined,
+                    color: kTerminalDim,
+                    size: 20,
+                  ),
+                  onPressed: _showReportDialog,
+                  tooltip: 'Report content',
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
                 ),
               ),
             ),

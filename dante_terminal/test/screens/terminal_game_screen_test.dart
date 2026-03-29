@@ -332,8 +332,10 @@ void main() {
           ),
         );
 
-        final iconButton =
-            tester.widget<IconButton>(find.byType(IconButton));
+        final sendButton = find.byWidgetPredicate(
+          (widget) => widget is IconButton && widget.tooltip == 'Send command',
+        );
+        final iconButton = tester.widget<IconButton>(sendButton);
         expect(iconButton.constraints?.minWidth, greaterThanOrEqualTo(48));
         expect(iconButton.constraints?.minHeight, greaterThanOrEqualTo(48));
       });
@@ -346,8 +348,10 @@ void main() {
           ),
         );
 
-        final iconButton =
-            tester.widget<IconButton>(find.byType(IconButton));
+        final sendButton = find.byWidgetPredicate(
+          (widget) => widget is IconButton && widget.tooltip == 'Send command',
+        );
+        final iconButton = tester.widget<IconButton>(sendButton);
         expect(iconButton.tooltip, 'Send command');
       });
 
